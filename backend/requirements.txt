@@ -1,0 +1,32 @@
+# --- Core API ---
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+pydantic==2.10.4
+pydantic-settings==2.7.1
+python-multipart==0.0.20
+itsdangerous==2.2.0
+
+# --- Security ---
+argon2-cffi==23.1.0
+
+# --- Data / retrieval ---
+pandas==2.2.3
+rank-bm25==0.2.2
+
+# --- LLM client ---
+httpx==0.28.1
+
+# --- Document intake ---
+pymupdf==1.25.1          # digital PDF text extraction
+python-docx==1.1.2       # DOCX text extraction
+
+# --- Tests ---
+pytest==8.3.4
+pytest-asyncio==0.25.0
+
+# --- Optional extras (install separately; system degrades gracefully without them) ---
+# Scanned-image OCR (needs the Tesseract binary on PATH):
+#   pip install pytesseract==0.3.13 pillow==11.0.0
+# NER-based de-identification (heavy; rule-based de-id is always on without it):
+#   pip install presidio-analyzer==2.2.355 presidio-anonymizer==2.2.355
+#   python -m spacy download en_core_web_lg

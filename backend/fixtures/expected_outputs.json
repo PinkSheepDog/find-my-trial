@@ -1,0 +1,96 @@
+{
+  "cases": [
+    {
+      "case_id": "her2_positive_metastatic_breast_cancer",
+      "expected_profile": {
+        "age": 62,
+        "sex": "Female",
+        "diagnosis": "Metastatic HER2-positive breast cancer",
+        "metastatic_sites": [
+          "Liver",
+          "Bone"
+        ],
+        "biomarkers": [
+          "HER2 positive"
+        ],
+        "therapies": [
+          "Trastuzumab",
+          "Pertuzumab",
+          "Paclitaxel",
+          "Doxorubicin",
+          "Cyclophosphamide"
+        ],
+        "performance_status": "ECOG 1"
+      },
+      "expected_results": [
+        {
+          "rank": 1,
+          "nct": "NCT05253911",
+          "confidence": 92,
+          "fit": "High confidence"
+        },
+        {
+          "rank": 2,
+          "nct": "NCT05982626",
+          "confidence": 71,
+          "fit": "Promising but verify purpose"
+        },
+        {
+          "rank": 8,
+          "nct": "NCT06065748",
+          "confidence": 24,
+          "fit": "Low fit"
+        }
+      ]
+    },
+    {
+      "case_id": "messy_tnbc_her2_low_breast_cancer",
+      "expected_profile": {
+        "age": 64,
+        "sex": "Female",
+        "diagnosis": "Metastatic TNBC / HER2-low breast cancer context",
+        "metastatic_sites": [
+          "Lung",
+          "Pleural effusion"
+        ],
+        "biomarkers": [
+          "PD-L1 positive",
+          "HER2 IHC 1+",
+          "BRCA negative",
+          "MSI stable",
+          "HRD borderline"
+        ],
+        "therapies": [
+          "ddAC",
+          "Paclitaxel",
+          "Carboplatin",
+          "Gemcitabine",
+          "Atezolizumab",
+          "Nab-paclitaxel",
+          "Capecitabine"
+        ],
+        "performance_status": "ECOG 2"
+      },
+      "expected_results": [
+        {
+          "rank": 1,
+          "nct": "NCT06371274",
+          "confidence": 84,
+          "fit": "Strong disease fit; verify prior toxicity and stage"
+        },
+        {
+          "rank": 2,
+          "nct": "NCT01898117",
+          "confidence": 69,
+          "fit": "Promising historical/therapy signal; status limits usefulness"
+        },
+        {
+          "rank": 6,
+          "nct": "NCT01251874",
+          "confidence": 48,
+          "fit": "Conditional / lower confidence"
+        }
+      ]
+    }
+  ]
+}

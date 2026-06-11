@@ -1,0 +1,59 @@
+# ============================================================================
+#  Find My Trial — .gitignore
+#  HARD RULE: no secrets, no PHI, no large binaries, ever enter version control.
+#  The previous prototype committed real patient charts and a 33MB CSV. Never again.
+# ============================================================================
+
+# --- Secrets ---
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+secrets/
+
+# --- Patient data / PHI (NEVER COMMIT) ---
+# Any real or uploaded chart, OCR output, or de-id artifact stays local.
+backend/data/uploads/
+backend/data/phi/
+*.phi
+patient_*.txt
+patient_*.pdf
+*_chart.txt
+*_chart.pdf
+# Synthetic PHI test charts live in fixtures/ for local de-id testing — NEVER commit them.
+backend/fixtures/phi_*.txt
+backend/fixtures/phi_*.pdf
+
+# --- Trial corpus (large, public — fetched/copied at setup, not committed) ---
+backend/data/*.csv
+backend/data/trials/
+*.npy
+
+# --- Build / cache artifacts ---
+backend/data/index_cache/
+.cache/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# --- Virtual environments ---
+.venv/
+venv/
+env/
+
+# --- Node / frontend ---
+node_modules/
+frontend/dist/
+frontend/build/
+frontend/.vite/
+
+# --- OS / editor ---
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.log
