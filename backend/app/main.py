@@ -1,3 +1,4 @@
+
 """FastAPI application — the secure entry point.
 
 Security posture enforced here:
@@ -16,10 +17,12 @@ from __future__ import annotations
 
 import secrets
 from contextlib import asynccontextmanager
+from pathlib import Path
 
+import httpx
 from fastapi import Depends, FastAPI, File, Form, HTTPException, Request, Response, UploadFile, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
 
 from app.api.schemas import (
     DeidRequest,
@@ -42,11 +45,38 @@ from app.trials.retrieve import RetrievalFilters
 _CSRF_COOKIE = "fmt_csrf"
 _CSRF_HEADER = "x-csrf-token"
 
+# Built React SPA (frontend/dist). Present in production images and after a local
+# `npm run build`; absent in dev (where Vite serves the frontend and proxies /api).
+_FRONTEND_DIST = Path(__file__).resolve().parents[2] / "frontend" / "dist"
+
+
+def _ensure_corpus(settings: Settings) -> None:
+    """Make sure the trial CSV exists locally. On a fresh cloud deploy the 33MB corpus
+    is not in git; if a download URL is configured, fetch it once at startup."""
+    path = Path(settings.trials_csv_path)
+    if path.exists() and path.stat().st_size > 0:
+        return
+    if not settings.trials_csv_url:
+        raise RuntimeError(
+            f"Trial corpus not found at {path} and FMT_TRIALS_CSV_URL is not set. "
+            "Provide the corpus file or a download URL."
+        )
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(path.suffix + ".part")
+    with httpx.stream("GET", settings.trials_csv_url, follow_redirects=True, timeout=180.0) as resp:
+        resp.raise_for_status()
+        with open(tmp, "wb") as fh:
+            for chunk in resp.iter_bytes(chunk_size=1 << 20):
+                fh.write(chunk)
+    tmp.replace(path)  # atomic: never leave a half-written corpus in place
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     settings = get_settings()
-    # Build the trial index once at startup (content-hashed).
+    # Ensure the corpus is present (cloud deploys fetch it on first boot), then
+    # build the trial index once at startup (content-hashed).
+    _ensure_corpus(settings)
     app.state.index = TrialIndex.from_csv(settings.trials_csv_path)
     app.state.pipeline = MatchingPipeline(settings, app.state.index)
     app.state.deidentifier = Deidentifier(use_presidio=settings.use_presidio)
@@ -138,6 +168,7 @@ async def login(payload: LoginRequest, response: Response, request: Request,
 @app.post("/api/logout")
 async def logout(request: Request, response: Response, settings: Settings = Depends(get_settings),
                  session: Session = Depends(require_session)):
+    _require_csrf(request)
     raw = request.cookies.get(settings.session_cookie_name)
     sid = unsign_sid(settings, raw) if raw else None
     request.app.state.sessions.destroy(sid)
@@ -212,3 +243,22 @@ async def match_endpoint(
 async def http_exc_handler(request: Request, exc: HTTPException):
     # Uniform error shape; never echo internals.
     return JSONResponse(status_code=exc.status_code, content={"error": exc.detail})
+
+
+# --------------------------------------------------------------------------- static SPA
+# Serve the built React app from the SAME origin as the API (so the HttpOnly,
+# SameSite=Strict session cookie works without cross-site relaxation). Registered
+# LAST so every /api and /health route is matched first. Only mounted when a build
+# exists — in dev, Vite serves the frontend and proxies /api, so this is skipped.
+if _FRONTEND_DIST.is_dir():
+    _INDEX_HTML = _FRONTEND_DIST / "index.html"
+
+    @app.get("/{full_path:path}", include_in_schema=False)
+    async def spa(full_path: str):
+        # Unknown API paths must 404 as JSON, not fall through to index.html.
+        if full_path == "health" or full_path.startswith("api/"):
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+        candidate = (_FRONTEND_DIST / full_path).resolve()
+        if _FRONTEND_DIST in candidate.parents and candidate.is_file():
+            return FileResponse(candidate)
+        return FileResponse(_INDEX_HTML)  # SPA fallback (client-side routing / refresh)

@@ -1,0 +1,33 @@
+# Render Blueprint — https://render.com/docs/blueprint-spec
+# One always-on web service that builds the Docker image (API + built SPA) and
+# serves both on a single origin. Connect the repo in Render and it reads this file.
+services:
+  - type: web
+    name: find-my-trial
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free                 # 512MB RAM. Index needs ~300MB; bump to a larger plan if it OOMs.
+    region: oregon
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: FMT_ENV
+        value: production      # enables HSTS + Secure cookies
+      - key: FMT_SECRET_KEY
+        generateValue: true    # Render generates a strong random value
+      - key: FMT_ADMIN_USERNAME
+        value: admin
+      - key: FMT_ADMIN_PASSWORD
+        sync: false            # set in the Render dashboard (secret) — this is your login
+      - key: FMT_OPENROUTER_API_KEY
+        sync: false            # your OpenRouter key (sk-or-v1-...)
+      - key: FMT_LLM_EXTRACTION_MODEL
+        value: google/gemini-3.1-flash-lite
+      - key: FMT_LLM_RERANK_MODEL
+        value: google/gemini-3.1-flash-lite
+      - key: FMT_OPENROUTER_ENFORCE_ZDR
+        value: "true"
+      - key: FMT_TRIALS_CSV_URL
+        sync: false            # URL to the 33MB corpus (e.g. a GitHub Release asset)
+      - key: FMT_CORS_ORIGINS
+        sync: false            # set to your https://<service>.onrender.com URL after first deploy

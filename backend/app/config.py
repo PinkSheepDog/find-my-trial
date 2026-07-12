@@ -28,14 +28,17 @@ class Settings(BaseSettings):
     openrouter_api_key: str = ""
 
     # --- LLM models (model-agnostic via OpenRouter) ---
-    llm_extraction_model: str = "anthropic/claude-haiku-4.5"
-    llm_rerank_model: str = "anthropic/claude-sonnet-4.6"
+    llm_extraction_model: str = "google/gemini-3.1-flash-lite"
+    llm_rerank_model: str = "google/gemini-3.1-flash-lite"
     openrouter_enforce_zdr: bool = True
     openrouter_base_url: str = "https://openrouter.ai/api/v1"
     llm_timeout_seconds: float = 60.0
 
     # --- Data ---
     trials_csv_path: str = "data/trials.csv"
+    # Optional: if the CSV is absent at startup (e.g. a fresh cloud deploy where the
+    # 33MB corpus is not in git), download it once from this URL. Empty = never fetch.
+    trials_csv_url: str = ""
 
     # --- Auth / session ---
     session_idle_timeout_minutes: int = 30

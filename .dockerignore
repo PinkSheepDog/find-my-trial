@@ -1,0 +1,30 @@
+# Keep the build context small and free of secrets / PHI / large binaries.
+**/.git
+**/.venv
+**/.venv_mac
+**/venv
+**/env
+**/node_modules
+**/__pycache__
+**/*.pyc
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache
+
+# Frontend build is produced inside the image (stage 1) — never ship a local one.
+frontend/dist
+frontend/.vite
+
+# Secrets and PHI must never enter the image.
+.env
+.env.*
+!.env.example
+backend/fixtures/phi_*.txt
+backend/fixtures/phi_*.pdf
+
+# The 33MB corpus is fetched at boot via FMT_TRIALS_CSV_URL, not baked in.
+backend/data/*.csv
+
+# OS / editor cruft
+.DS_Store
+*.log

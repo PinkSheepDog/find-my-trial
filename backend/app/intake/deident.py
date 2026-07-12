@@ -6,16 +6,26 @@ from chart text BEFORE it can be sent to any external service (the LLM).
 Design:
   * A deterministic RULE layer is ALWAYS on. It needs no models, no network,
     runs offline, and is fully testable. It covers the structured/format-bearing
-    identifiers (MRN, SSN, dates, phone, email, addresses, IDs) plus common
-    name patterns ("Dr. X", "Name: X", "patient X").
+    identifiers (MRN/HRN, SSN, dates, phone, email, addresses, IDs) plus name
+    patterns with a clear signal ("Dr. X", "Name: X", "First M. Last", or a
+    "Firstname Lastname" whose first token is a known given name).
   * An optional NER layer (Presidio/spaCy) catches free-text person names the
     rules miss. It is additive — never required — and the system degrades
     cleanly to rule-only if Presidio is not installed.
 
 CRITICAL: clinically meaningful tokens must survive de-identification. Biomarker
-status ("HER2", "BRCA negative"), drug names, ECOG, stage, ages-in-years, and
-lab values are NOT identifiers and must NOT be redacted. We redact identity, not
-medicine. Over-redaction that destroys clinical signal is treated as a bug.
+status ("HER2", "BRCA negative"), drug names, ECOG, stage, ages-in-years, lab
+values, and section/label text are NOT identifiers and must NOT be redacted. We
+redact identity, not medicine. Over-redaction that destroys clinical signal is
+treated as a bug, equal in severity to a leak.
+
+Name detection is POSITIVE-SIGNAL, not denylist-based: a bare "Word Word" phrase
+is only redacted as a name when it carries a name signal (middle initial, or a
+first token that is a known given name). This is what keeps documents dense with
+Title Case medical terms ("Serum Tumor Markers", "Chronic Liver Disease") intact.
+The trade-off: an unlabeled name with an uncommon first name and no middle initial
+can slip through in rules-only mode — enable Presidio (FMT_USE_PRESIDIO=true) for
+free-text-heavy inputs, and note that /api/match re-scrubs as defense-in-depth.
 
 Ages: HIPAA Safe Harbor requires ages > 89 be generalized. Ages <= 89 in years
 are retained (they are needed for trial age-eligibility matching).
@@ -41,7 +51,8 @@ TAG_ID = "[ID]"
 TAG_AGE = "[AGE>89]"
 
 
-# Words that look like names (capitalized) but are clinical/structural — never redact.
+# Clinical/structural tokens that can look like names (capitalized) but never are.
+# This is a SECONDARY guard; the primary name gate is the given-name signal below.
 _CLINICAL_SAFEWORDS = {
     "ecog", "her2", "egfr", "alk", "ros1", "braf", "kras", "brca", "brca1", "brca2",
     "pd", "pdl1", "msi", "hrd", "tnbc", "her2-low", "ihc", "fish", "ca", "cea",
@@ -50,6 +61,71 @@ _CLINICAL_SAFEWORDS = {
     "ned", "sob", "hfs", "qol", "dm", "dm2", "htn", "ckd", "oa", "kps", "bmi",
     "icd", "nct", "phase", "arm", "dose", "iv", "po", "left", "right", "lung",
     "liver", "bone", "brain", "breast", "node", "lobe",
+}
+
+# Common English / report / medical words that are frequently Title-Cased in
+# documents (section headers, lab names, comorbidities). If any token of a
+# candidate "name" is in here, it is not a person name. Belt-and-suspenders on
+# top of the given-name gate.
+_COMMON_NON_NAME_WORDS = {
+    "patient", "information", "identification", "data", "general", "biochemistry",
+    "blood", "drawn", "realization", "date", "name", "personal", "comorbidities",
+    "hemolized", "hemolyzed", "sample", "serum", "urine", "tumor", "tumour",
+    "markers", "marker", "lifestyle", "atherosclerosis", "chronic", "liver",
+    "disease", "diabetes", "mellitus", "jaundice", "renal", "failure", "smoking",
+    "negative", "positive", "outcome", "results", "result", "some", "reference",
+    "range", "low", "moderate", "high", "comments", "comment", "absence", "false",
+    "healthy", "patients", "increasing", "whole", "levels", "level", "suggest",
+    "malignancy", "conclusions", "conclusion", "cancer", "diagnosis", "code",
+    "malignant", "neoplasm", "report", "generated", "entered", "disclaimer",
+    "multiple", "biomarkers", "biomarker", "activity", "algorithm", "developed",
+    "exclusive", "healthcare", "professionals", "solely", "clinical", "decision",
+    "support", "system", "unique", "element", "sensitivity", "specificity",
+    "please", "note", "negativity", "possibility", "epithelial", "royal",
+    "hospital", "technical", "responsible", "chief", "scientific", "officer",
+    "email", "website", "powered", "creatinine", "bilirubin", "total", "age",
+    "years", "final", "review", "summary", "history", "physical", "exam",
+    "assessment", "plan", "impression", "medications", "allergies", "vitals",
+    "laboratory", "labs", "pathology", "radiology", "oncology", "hematology",
+    "department", "medical", "center", "clinic", "university", "national",
+    "institute", "records", "record", "number",
+}
+
+_NON_NAME_WORDS = _CLINICAL_SAFEWORDS | _COMMON_NON_NAME_WORDS
+
+# Common given names (English + widely-seen international). Used as a POSITIVE
+# signal: an unlabeled "Firstname Lastname" is only redacted when its first token
+# is a plausible given name. This is bounded and stable, unlike enumerating all
+# medical vocabulary. Not exhaustive by design — Presidio covers the long tail.
+_GIVEN_NAMES = {
+    # Female
+    "mary", "patricia", "jennifer", "linda", "elizabeth", "barbara", "susan",
+    "jessica", "sarah", "karen", "nancy", "lisa", "margaret", "sandra", "ashley",
+    "kimberly", "emily", "donna", "michelle", "carol", "amanda", "dorothy",
+    "melissa", "deborah", "stephanie", "rebecca", "laura", "sharon", "cynthia",
+    "kathleen", "helen", "amy", "angela", "anna", "ruth", "brenda", "pamela",
+    "nicole", "katherine", "virginia", "catherine", "christine", "samantha",
+    "debra", "janet", "carolyn", "rachel", "heather", "diane", "julie", "emma",
+    "olivia", "sophia", "isabella", "ava", "mia", "charlotte", "amelia", "harper",
+    "evelyn", "abigail", "ella", "sofia", "grace", "chloe", "victoria", "lily",
+    "maria", "lorena", "lucia", "elena", "olga", "natasha", "fatima", "aisha",
+    "priya", "ananya", "neha", "pooja", "claire", "marie", "greta", "ingrid",
+    "francesca", "giulia", "jane", "joan", "judith", "megan", "hannah", "zoe",
+    # Male
+    "james", "john", "robert", "michael", "william", "david", "richard", "joseph",
+    "thomas", "charles", "christopher", "daniel", "matthew", "anthony", "mark",
+    "donald", "steven", "paul", "andrew", "joshua", "kenneth", "kevin", "brian",
+    "george", "timothy", "ronald", "edward", "jason", "jeffrey", "ryan", "jacob",
+    "gary", "nicholas", "eric", "jonathan", "stephen", "larry", "justin", "scott",
+    "brandon", "benjamin", "samuel", "gregory", "alexander", "patrick", "frank",
+    "raymond", "jack", "dennis", "jerry", "tyler", "aaron", "jose", "henry",
+    "adam", "douglas", "nathan", "peter", "zachary", "kyle", "walter", "noah",
+    "liam", "ethan", "mason", "logan", "lucas", "oliver", "elijah", "carlos",
+    "juan", "luis", "miguel", "jorge", "pedro", "marco", "giovanni", "giuseppe",
+    "mohammed", "mohamed", "ahmed", "ali", "hassan", "omar", "yusuf", "ibrahim",
+    "raj", "amit", "sanjay", "anil", "sunil", "ravi", "deepak", "arjun", "rohan",
+    "wei", "chen", "hiroshi", "kenji", "ivan", "dimitri", "pierre", "jean", "hans",
+    "klaus", "lars", "erik", "sven", "antoine",
 }
 
 # Month names so we can catch "March 2014", "Aug 2019", etc.
@@ -116,12 +192,13 @@ class Deidentifier:
         out = sub(_RE_EMAIL, TAG_EMAIL, out)
         out = sub(_RE_SSN, TAG_SSN, out)
         out = sub(_RE_PHONE, TAG_PHONE, out)
-        out = sub(_RE_MRN, TAG_MRN, out)
-        out = sub(_RE_NCT_OTHER_ID, TAG_ID, out)  # patient-side record IDs (P-1001 etc.)
+        out = sub(_RE_MRN, TAG_MRN, out)             # labeled MRN/HRN (numeric or alphanumeric)
+        out = sub(_RE_NCT_OTHER_ID, TAG_ID, out)     # patient-side record IDs (P-1001 etc.)
         out = self._redact_ages_over_89(out, counts)
         out = sub(_RE_DOB_LABELED, TAG_DATE, out)
         out = sub(_RE_DATE_NUMERIC, TAG_DATE, out)
         out = sub(_RE_DATE_MONTH_YEAR, TAG_DATE, out)
+        out = sub(_RE_LONG_NUMERIC_ID, TAG_ID, out)  # bare long digit runs (barcodes/record #s)
         out = sub(_RE_ADDRESS_CITY_STATE, TAG_ADDRESS, out)
         out = sub(_RE_LABELED_NAME, TAG_NAME, out)
         out = sub(_RE_TITLED_NAME, TAG_NAME, out)
@@ -147,17 +224,26 @@ class Deidentifier:
         return _RE_AGE.sub(_repl, text)
 
     def _redact_freetext_names(self, text: str, counts: dict[str, int]) -> str:
-        """Catch bare person names ("Maria E. Thompson", "Jane Doe") that carry no
-        label. Guarded by a clinical safeword list so medical multi-word phrases
-        (e.g. "Breast Cancer", "Heart Failure") are not mistaken for names."""
+        """Catch bare person names ("Maria E. Thompson", "Maria Khan") that carry no
+        label or title. POSITIVE-SIGNAL only: a candidate is redacted as a name only
+        when it has a middle initial OR its first token is a known given name, and
+        never when any token is a common clinical/structural word. This preserves
+        Title-Case medical text ("Serum Tumor Markers", "Chronic Liver Disease")."""
 
         def _repl(m: re.Match[str]) -> str:
             phrase = m.group(0)
-            tokens = [t for t in re.split(r"[\s.]+", phrase) if t]
-            # If any token is a known clinical/structural word, it's not a name.
-            if any(t.lower() in _CLINICAL_SAFEWORDS for t in tokens):
+            # A field label ("Total Bilirubin:") is structural, not a name.
+            if m.string[m.end():m.end() + 1] == ":":
                 return phrase
-            # If every alphabetic token is clinical-safe-cased medicine, skip.
+            tokens = [t for t in re.split(r"[ \t.]+", phrase) if t]
+            low = [t.lower() for t in tokens]
+            # Any common/clinical word present -> not a person name.
+            if any(t in _NON_NAME_WORDS for t in low):
+                return phrase
+            has_middle_initial = m.group("mi") is not None
+            first_is_given = low[0] in _GIVEN_NAMES
+            if not (has_middle_initial or first_is_given):
+                return phrase  # no name signal -> leave it (avoid clinical destruction)
             counts[TAG_NAME] = counts.get(TAG_NAME, 0) + 1
             return TAG_NAME
 
@@ -193,9 +279,14 @@ _RE_PHONE = re.compile(
     r"(?:\+?1[\s.\-]?)?(?:\(\d{3}\)\s*|\d{3}[\s.\-])\d{3}[\s.\-]\d{4}\b"
 )
 
-# MRN / medical record numbers — labeled or a bare long digit run after "MRN".
+# MRN / HRN / medical-record numbers. Labeled, value may be numeric OR alphanumeric
+# ("BRE00000273"), and the value may sit on the next line (tabular reports). Crosses
+# at most one line break to reach the value.
 _RE_MRN = re.compile(
-    r"\b(?:MRN|Medical\s+Record(?:\s+Number)?|Record\s*#)\s*[:#]?\s*\d{4,}\b",
+    r"\b(?:MRN|HRN|Medical\s+Record(?:\s+Number)?|Hospital\s+Record(?:\s+Number)?|"
+    r"Record\s*(?:Number|No\.?|#))"
+    r"[ \t]*[:#]?[ \t]*\n?[ \t]*"
+    r"(?:[A-Za-z]{1,5})?\d[A-Za-z0-9\-]{3,}\b",
     re.IGNORECASE,
 )
 
@@ -219,7 +310,7 @@ _RE_DOB_LABELED = re.compile(
     re.IGNORECASE,
 )
 
-# Numeric dates: 09/25/1961, 3-14-2014, 2014/03/01
+# Numeric dates: 09/25/1961, 3-14-2014, 2014/03/01, 25-01-2020
 _RE_DATE_NUMERIC = re.compile(
     r"\b\d{1,2}[/\-]\d{1,2}[/\-]\d{2,4}\b|\b\d{4}[/\-]\d{1,2}[/\-]\d{1,2}\b"
 )
@@ -229,30 +320,38 @@ _RE_DATE_MONTH_YEAR = re.compile(
     rf"\b(?:{_MONTHS})\.?\s+\d{{4}}\b", re.IGNORECASE
 )
 
+# Bare long digit runs (>=9 digits): barcodes, document control numbers, record IDs.
+# Specific formats (phone, SSN, MRN, dates) are handled above and run first.
+_RE_LONG_NUMERIC_ID = re.compile(r"\b\d{9,}\b")
+
 # City, State[, country]: "Detroit, MI", "Detroit, Michigan"
 _RE_ADDRESS_CITY_STATE = re.compile(
     rf"\b[A-Z][a-zA-Z]+,\s*(?:{_US_STATES}|{_STATE_ABBR})\b",
     re.IGNORECASE,
 )
 
-# Labeled names: "Patient Name: Jane Doe", "Name: Maria E. Thompson"
+# Labeled names: "Patient Name: Jane Doe", "Name: Maria E. Thompson". The label and
+# value may be on separate lines (crosses at most one line break); the name tokens
+# themselves stay on a single line so we don't swallow the next line's content.
 _RE_LABELED_NAME = re.compile(
-    r"\b(?:Patient\s+Name|Name|Pt\s+Name)\s*[:#]\s*"
-    r"[A-Z][a-zA-Z'\-]+(?:\s+[A-Z]\.?)?(?:\s+[A-Z][a-zA-Z'\-]+){1,2}",
+    r"\b(?:Patient\s+Name|Name|Pt\s+Name)[ \t]*[:#][ \t]*\n?[ \t]*"
+    r"[A-Z][a-zA-Z'\-]+(?:[ \t]+[A-Z]\.?)?(?:[ \t]+[A-Z][a-zA-Z'\-]+){1,2}",
 )
 
-# Titled names: "Dr. Patel", "Dr. Lin (endocrine)", "A. Patel MD"
+# Titled names: "Dr. Patel", "Dr. Lin", "A. Patel MD"
 _RE_TITLED_NAME = re.compile(
-    r"\b(?:Dr|Doctor|Mr|Mrs|Ms|Prof)\.?\s+[A-Z][a-zA-Z'\-]+(?:\s+[A-Z][a-zA-Z'\-]+)?"
-    r"|\b[A-Z]\.\s*[A-Z][a-zA-Z'\-]+\s+(?:MD|DO|PhD|RN|NP|PA)\b",
+    r"\b(?:Dr|Doctor|Mr|Mrs|Ms|Prof)\.?[ \t]+[A-Z][a-zA-Z'\-]+(?:[ \t]+[A-Z][a-zA-Z'\-]+)?"
+    r"|\b[A-Z]\.[ \t]*[A-Z][a-zA-Z'\-]+[ \t]+(?:MD|DO|PhD|RN|NP|PA)\b",
 )
 
 
 # Free-text personal names: "First Last" or "First M. Last" (2-3 capitalized tokens,
-# optional middle initial). Conservative: requires each surname-ish token to be >=2
-# letters. Clinical multi-word phrases are filtered out by the safeword guard above.
+# optional middle initial), on a SINGLE line. Whether it is actually redacted is
+# decided in _redact_freetext_names (given-name / middle-initial signal). The "mi"
+# group flags the middle-initial form, a strong name signal.
 _RE_FREETEXT_NAME = re.compile(
-    r"\b[A-Z][a-z]{1,}\.?\s+(?:[A-Z]\.\s+)?[A-Z][a-z]{1,}(?:\s+[A-Z][a-z]{1,})?\b"
+    r"\b[A-Z][a-z]{1,}[ \t]+(?:(?P<mi>[A-Z])\.[ \t]+)?[A-Z][a-z]{1,}"
+    r"(?:[ \t]+[A-Z][a-z]{1,})?\b"
 )
 
 
