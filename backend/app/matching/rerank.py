@@ -98,7 +98,7 @@ class DeterministicReranker:
             brief_summary=rec.brief_summary[:420],
             conditions=rec.conditions[:6], interventions=rec.interventions[:6],
             locations=rec.locations[:3],
-            confidence=round(conf, 1),
+            match_score=round(conf, 1),
             fit_label=_fit_label(conf, bool(c.contraindications)),
             reasons=reasons, cautions=cautions, contraindications=c.contraindications,
             matched_conditions=c.matched_conditions, matched_biomarkers=c.matched_biomarkers,
@@ -175,7 +175,7 @@ class LLMReranker:
                 "nct": r.nct, "title": r.title, "summary": r.brief_summary,
                 "conditions": r.conditions, "interventions": r.interventions,
                 "status": r.status, "phase": r.phase,
-                "base_confidence": r.confidence, "contraindications": r.contraindications,
+                "base_confidence": r.match_score, "contraindications": r.contraindications,
             }
             for r in base[:slice_n]
         ]
@@ -207,10 +207,10 @@ class LLMReranker:
             if e.get("cautions"):
                 r.cautions = [str(x) for x in e["cautions"]][:5]
             if isinstance(e.get("confidence"), (int, float)) and not r.contraindications:
-                r.confidence = max(0.0, min(100.0, float(e["confidence"])))
-                r.fit_label = _fit_label(r.confidence, bool(r.contraindications))
+                r.match_score = max(0.0, min(100.0, float(e["confidence"])))
+                r.fit_label = _fit_label(r.match_score, bool(r.contraindications))
             r.explained_by = "llm"
-        base[:slice_n] = sorted(base[:slice_n], key=lambda r: r.confidence, reverse=True)
+        base[:slice_n] = sorted(base[:slice_n], key=lambda r: r.match_score, reverse=True)
         for i, r in enumerate(base, start=1):
             r.rank = i
         return base

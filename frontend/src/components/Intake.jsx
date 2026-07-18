@@ -31,8 +31,10 @@ export default function Intake({ onDeidentify, filters, setFilters, busy }) {
       <div className="intake-grid">
         <div className="intake-main">
           <label className="file-row">
-            <span>Upload chart (PDF, DOCX, TXT, image)</span>
-            <input type="file" accept=".pdf,.docx,.txt,.rtf,.png,.jpg,.jpeg,.tif,.tiff" onChange={onFile} />
+            <span>Upload chart — FHIR/C-CDA, PDF, DOCX, TXT, or image</span>
+            <input type="file"
+              accept=".json,.fhir,.ndjson,.xml,.pdf,.docx,.txt,.rtf,.png,.jpg,.jpeg,.tif,.tiff"
+              onChange={onFile} />
           </label>
           {fileNote && <div className="file-note">{fileNote}</div>}
 

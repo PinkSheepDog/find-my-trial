@@ -28,7 +28,7 @@ class TrialResult(BaseModel):
     interventions: list[str] = Field(default_factory=list)
     locations: list[str] = Field(default_factory=list)
 
-    confidence: float                 # 0-100, calibrated fit (NOT eligibility)
+    match_score: float                # 0-100 FIT / review priority — NOT an eligibility probability
     fit_label: str                    # e.g. "Strong fit", "Promising", "Conditional", "Low fit"
     reasons: list[str] = Field(default_factory=list)
     cautions: list[str] = Field(default_factory=list)

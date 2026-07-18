@@ -60,7 +60,7 @@ function buildSummary(profile, selected) {
   lines.push("");
   selected.forEach((r, i) => {
     lines.push(`${i + 1}. ${r.nct} — ${r.title}`);
-    lines.push(`   Fit: ${r.confidence.toFixed(0)}% (${r.fit_label}) · ${r.status} · ${r.phase}`);
+    lines.push(`   Match score: ${r.match_score.toFixed(0)}/100 (${r.fit_label}, NOT eligibility) · ${r.status} · ${r.phase}`);
     if (r.reasons?.length) lines.push("   Reasons: " + r.reasons.join("; "));
     if (r.cautions?.length) lines.push("   Manual checks: " + r.cautions.join("; "));
     if (r.contraindications?.length) lines.push("   ⚠ Conflict: " + r.contraindications.join(" "));
