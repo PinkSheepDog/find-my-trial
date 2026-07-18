@@ -1,0 +1,7 @@
+[SYNTHETIC OCR TEST - LOW QUALITY]
+Pt: Av3ry Samp1epatient  ID SYNTH-BREAST-MESSY-002
+addendurn 5/12/26: capecitab1ne STOPPED - progression
+lung core 5/22/26 HER2 IHC 1+ ; lSH not amp1ified ; ER/PR neg ; PD-L1 CPS l5
+old br3ast spec 2018 HER2 zero (historica1)
+CT 6/28: pu1m nodu1es s1 larger, sm R p1eural eff. N0 1iver lesion. N0 osseous 1esion.
+ECOG one. prefers Ml/0H <=250 mi. [review OCR confidence]

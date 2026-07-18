@@ -23,13 +23,53 @@ from dataclasses import dataclass, field
 @dataclass
 class ExtractedDocument:
     text: str
-    source_kind: str                       # "text" | "pdf" | "pdf+ocr" | "docx" | "image"
+    source_kind: str          # "text" | "pdf" | "pdf+ocr" | "docx" | "image" | "fhir" | "ccda"
     warnings: list[str] = field(default_factory=list)
     ocr_used: bool = False
 
 
 _RTF_CONTROL = re.compile(r"\\[a-zA-Z]+-?\d* ?")
 _RTF_HEX = re.compile(r"\\'([0-9a-fA-F]{2})")
+
+# Accepted upload types and their magic-byte signatures. Text-ish formats have no
+# reliable signature (validated as decodable instead).
+ALLOWED_EXTENSIONS = (
+    ".txt", ".md", ".rtf", ".pdf", ".docx", ".json", ".fhir", ".ndjson", ".xml",
+    ".png", ".jpg", ".jpeg", ".tif", ".tiff", ".bmp",
+)
+_MAGIC = {
+    ".pdf": (b"%PDF",),
+    ".docx": (b"PK\x03\x04",),          # docx is a zip
+    ".png": (b"\x89PNG\r\n\x1a\n",),
+    ".jpg": (b"\xff\xd8\xff",), ".jpeg": (b"\xff\xd8\xff",),
+    ".tif": (b"II*\x00", b"MM\x00*"), ".tiff": (b"II*\x00", b"MM\x00*"),
+    ".bmp": (b"BM",),
+}
+
+
+class UploadRejected(ValueError):
+    """Raised when an upload fails validation. Carries a client-safe message + code."""
+
+    def __init__(self, message: str, status_code: int = 415) -> None:
+        super().__init__(message)
+        self.status_code = status_code
+
+
+def validate_upload(filename: str, data: bytes) -> None:
+    """Fail closed on empty, unsupported, or content-type-mismatched uploads. Message
+    text is client-safe (no chart content)."""
+    name = (filename or "").lower()
+    if not data:
+        raise UploadRejected("Empty file.", 400)
+    ext = "." + name.rsplit(".", 1)[-1] if "." in name else ""
+    if ext not in ALLOWED_EXTENSIONS:
+        raise UploadRejected(f"Unsupported file type {ext or '(none)'}. Allowed: "
+                             + ", ".join(sorted(set(ALLOWED_EXTENSIONS))), 415)
+    sigs = _MAGIC.get(ext)
+    if sigs and not any(data.startswith(s) for s in sigs):
+        raise UploadRejected(f"File content does not match its {ext} extension.", 415)
+    if ext == ".pdf" and b"/Encrypt" in data[:4096]:
+        raise UploadRejected("Encrypted PDFs are not supported; provide an unlocked copy.", 415)
 
 
 def extract_text(filename: str, data: bytes) -> ExtractedDocument:
@@ -42,6 +82,14 @@ def extract_text(filename: str, data: bytes) -> ExtractedDocument:
         return _extract_pdf(data)
     if name.endswith(".docx"):
         return _extract_docx(data)
+    if name.endswith((".json", ".fhir", ".ndjson")):
+        from app.intake.fhir_ingest import render_fhir
+        text, warnings = render_fhir(data)
+        return ExtractedDocument(text=text, source_kind="fhir", warnings=warnings)
+    if name.endswith(".xml"):
+        from app.intake.fhir_ingest import render_ccda
+        text, warnings = render_ccda(data)
+        return ExtractedDocument(text=text, source_kind="ccda", warnings=warnings)
     if name.endswith((".png", ".jpg", ".jpeg", ".tif", ".tiff", ".bmp")):
         return _extract_image(data)
     # Unknown: best-effort decode.

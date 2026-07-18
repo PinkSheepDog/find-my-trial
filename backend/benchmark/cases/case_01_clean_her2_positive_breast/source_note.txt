@@ -1,0 +1,25 @@
+        SYNTHETIC TEST DATA - NOT FOR CLINICAL USE
+        ONCOLOGY CONSULT NOTE
+        Patient: Jordan Testcase | ID: SYNTH-BREAST-HER2-001 | DOB: 1963-05-11 | State: MI
+
+        Assessment: Metastatic left breast invasive ductal carcinoma; Stage IV. Sites: liver, bone.
+        Current status: Progression in liver and bone on imaging dated 2026-06-20.
+
+        Biomarkers: HER2 IHC 3+ (2026-05-30, Liver core biopsy); ER Negative (<1%) (2026-05-30, Liver core biopsy); PR Negative (<1%) (2026-05-30, Liver core biopsy).
+
+        Treatment history:
+        - 2014-07-08 to 2014-07-08: Left lumpectomy [completed]; Completed
+- 2014-08-01 to 2015-01-22: Doxorubicin/cyclophosphamide followed by paclitaxel [completed]; Completed
+- 2014-08-01 to 2015-08-01: Trastuzumab [completed]; Completed
+- 2020-09-01 to 2021-03-22: Paclitaxel plus trastuzumab plus pertuzumab [completed]; Partial response, then progression
+- 2021-04-12 to 2023-02-06: Trastuzumab emtansine [stopped]; Stopped after progression
+
+        Imaging 2026-06-20: Multiple enlarging liver lesions and diffuse osseous metastases; no lung involvement. Impression: Progressive metastatic disease.
+        Performance: ECOG 1 on 2026-07-08.
+        Labs: Hemoglobin 10.9 g/dL (2026-07-08), Absolute neutrophil count 4.1 10*3/uL (2026-07-08), Platelets 240 10*3/uL (2026-07-08), Creatinine 0.9 mg/dL (2026-07-08), AST 62 U/L (2026-07-08), ALT 55 U/L (2026-07-08), Total bilirubin 0.8 mg/dL (2026-07-08).
+        Comorbidities: Hypertension, Type 2 diabetes mellitus. Allergies: Penicillin - rash, Latex - hives.
+        Preferences: Prefers Michigan, Ohio, or Illinois; approximately 350-mile radius; open to phase I-III treatment studies.
+
+        Referral question: Identify recruiting treatment studies for metastatic HER2-positive breast cancer after prior HER2-directed therapy.
+        Safety: return candidates and missing data for clinician review only. Do not infer eligibility,
+        recommend treatment, or predict outcome.

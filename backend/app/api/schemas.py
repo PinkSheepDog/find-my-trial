@@ -39,6 +39,7 @@ class MatchRequest(BaseModel):
     top_k: int = Field(default=10, ge=1, le=30)
     active_only: bool = True
     interventional_only: bool = True
+    treatment_only: bool = True   # gate out diagnostic/screening/registry/observational studies
     location: str = ""
 
 
@@ -52,3 +53,5 @@ class HealthResponse(BaseModel):
     trial_count: int
     llm_enabled: bool
     degraded_mode: bool
+    data_current_through: str = ""     # latest trial "Last Update Posted" in the corpus
+    normalization_version: str = ""    # index/normalization revision

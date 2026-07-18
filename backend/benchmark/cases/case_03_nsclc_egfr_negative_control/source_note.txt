@@ -1,0 +1,23 @@
+        SYNTHETIC TEST DATA - NOT FOR CLINICAL USE
+        ONCOLOGY CONSULT NOTE
+        Patient: Riley Testrecord | ID: SYNTH-LUNG-EGFR-003 | DOB: 1958-09-02 | State: OH
+
+        Assessment: Metastatic right upper lobe lung adenocarcinoma; Stage IVB. Sites: contralateral lung, adrenal gland.
+        Current status: Progression after targeted therapy and platinum/pemetrexed.
+
+        Biomarkers: EGFR Exon 19 deletion (2022-02-14, Right lung core biopsy); ALK No rearrangement detected (2022-02-14, Right lung core biopsy); PD-L1 TPS 5% (2022-02-14, Right lung core biopsy).
+
+        Treatment history:
+        - 2022-03-01 to 2024-01-09: Osimertinib [stopped]; Stopped after progression
+- 2024-02-05 to 2024-06-17: Carboplatin plus pemetrexed [completed]; Six cycles; stable disease then progression
+- 2024-07-08 to 2025-03-03: Pemetrexed maintenance [stopped]; Stopped after progression
+
+        Imaging 2026-06-12: Right upper lobe mass increased with new left lung nodules and enlarging left adrenal lesion. No breast mass described. Impression: Progressive metastatic lung cancer.
+        Performance: ECOG 1 on 2026-07-01.
+        Labs: Hemoglobin 11.4 g/dL (2026-07-01), Absolute neutrophil count 4.8 10*3/uL (2026-07-01), Platelets 301 10*3/uL (2026-07-01), Creatinine 1.0 mg/dL (2026-07-01).
+        Comorbidities: Chronic obstructive pulmonary disease, Hyperlipidemia. Allergies: No known drug allergies.
+        Preferences: Prefers Ohio or Michigan; approximately 300-mile radius.
+
+        Referral question: Identify recruiting treatment studies for EGFR-mutated metastatic non-small cell lung cancer after osimertinib and platinum therapy.
+        Safety: return candidates and missing data for clinician review only. Do not infer eligibility,
+        recommend treatment, or predict outcome.

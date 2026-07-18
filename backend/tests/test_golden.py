@@ -51,8 +51,12 @@ def expected():
 def _run(chart_file, index, top_k=15):
     raw = (FIXTURES / chart_file).read_text(encoding="utf-8", errors="ignore")
     profile = RulesExtractor().extract(deidentify(raw).text)
+    # treatment_only=False: the legacy worked-example board includes real-world
+    # observational/registry comparators. The default treatment gate (which excludes
+    # them) is covered separately in test_retrieval.
     cands = retrieve(profile, index,
-                     filters=RetrievalFilters(active_only=False, interventional_only=False),
+                     filters=RetrievalFilters(active_only=False, interventional_only=False,
+                                              treatment_only=False),
                      top_k=80)
     results = DeterministicReranker().rerank(profile, cands, top_k)
     return profile, results

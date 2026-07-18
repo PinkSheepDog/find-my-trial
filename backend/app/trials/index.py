@@ -7,6 +7,7 @@ prior prototype, whose BERT cache was keyed only on model name).
 
 from __future__ import annotations
 
+import datetime
 import hashlib
 import re
 from dataclasses import dataclass, field
@@ -15,6 +16,13 @@ from pathlib import Path
 
 import pandas as pd
 from rank_bm25 import BM25Okapi
+
+from app.matching.clinical import disease_families_of, is_basket_text, primary_purpose
+
+# Bump when tokenization, disease-family/purpose logic, or record derivation changes.
+# Any on-disk cache must be keyed by (content_hash, NORMALIZATION_VERSION, model) so a
+# logic change can never be served from a stale index.
+NORMALIZATION_VERSION = "1.1.0-disease-purpose-gates"
 
 ACTIVE_STATUSES = {
     "RECRUITING", "ENROLLING_BY_INVITATION", "NOT_YET_RECRUITING",
@@ -54,6 +62,10 @@ class TrialRecord:
     is_interventional: bool = False
     search_text: str = ""
     tokens: list[str] = field(default_factory=list)
+    # clinical gates
+    disease_families: frozenset[str] = field(default_factory=frozenset)
+    study_purpose: str = "unknown"   # treatment | diagnostic | screening | observational | ...
+    is_basket: bool = False          # tumour-agnostic / solid-tumor basket study
 
     @property
     def is_active(self) -> bool:
@@ -78,19 +90,37 @@ def _age_buckets(age_value) -> set[str]:
 
 
 class TrialIndex:
-    def __init__(self, records: list[TrialRecord], content_hash: str) -> None:
+    def __init__(self, records: list[TrialRecord], content_hash: str,
+                 data_current_through: str = "") -> None:
         self.records = records
         self.content_hash = content_hash
+        self.data_current_through = data_current_through
+        self.normalization_version = NORMALIZATION_VERSION
+        self.built_at = datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat()
         self._bm25 = BM25Okapi([r.tokens for r in records])
         self._by_nct = {r.nct: i for i, r in enumerate(records)}
+
+    def manifest(self) -> dict:
+        """Build provenance — enough to detect a stale or incompatible index/cache."""
+        return {
+            "row_count": len(self.records),
+            "content_hash": self.content_hash[:16],
+            "normalization_version": self.normalization_version,
+            "data_current_through": self.data_current_through,
+            "built_at": self.built_at,
+        }
 
     @classmethod
     def from_csv(cls, csv_path: str | Path) -> "TrialIndex":
         csv_path = Path(csv_path)
         content_hash = _hash_file(csv_path)
         df = pd.read_csv(csv_path, dtype=str, keep_default_na=False)
+        latest_update = ""
         records: list[TrialRecord] = []
         for row in df.to_dict("records"):
+            upd = (row.get("Last Update Posted") or "").strip()
+            if upd > latest_update:
+                latest_update = upd
             conditions = _split_multi(row.get("Conditions", ""))
             interventions = [_clean_intervention(i) for i in _split_multi(row.get("Interventions", ""))]
             interventions = [i for i in interventions if i]
@@ -106,6 +136,12 @@ class TrialIndex:
             condition_text = " ".join(conditions)
             intervention_text = " ".join(interventions)
             search_text = " ".join([title, brief, condition_text, intervention_text, phase])
+            study_design = (row.get("Study Design") or "").strip()
+
+            # Disease family is read from CONDITIONS + TITLE only (not the free-text
+            # summary), so a trial that merely mentions another cancer in prose is not
+            # mis-classified into that family.
+            family_text = " ".join([condition_text, title])
 
             rec = TrialRecord(
                 nct=(row.get("NCT Number") or "").strip(),
@@ -116,10 +152,13 @@ class TrialIndex:
                 condition_text=condition_text, intervention_text=intervention_text,
                 is_interventional="INTERVENTIONAL" in study_type,
                 search_text=search_text, tokens=_tokenize(search_text),
+                disease_families=disease_families_of(family_text),
+                study_purpose=primary_purpose(study_type, study_design),
+                is_basket=is_basket_text(family_text),
             )
             if rec.nct:
                 records.append(rec)
-        return cls(records, content_hash)
+        return cls(records, content_hash, data_current_through=latest_update)
 
     def bm25_scores(self, query_tokens: list[str]):
         return self._bm25.get_scores(query_tokens)

@@ -18,6 +18,7 @@ import re
 from dataclasses import dataclass
 
 from app.extraction.schema import BiomarkerStatus, PatientProfile
+from app.matching.clinical import NON_TREATMENT_PURPOSES, disease_families_of
 from app.trials.index import TrialIndex, TrialRecord, _tokenize
 
 
@@ -31,12 +32,15 @@ class Candidate:
     matched_biomarkers: list[str]
     matched_therapies: list[str]
     contraindications: list[str]  # e.g. "Trial appears to require HER2-positive; patient is HER2-low"
+    disease_family: str = ""      # patient∩trial family that let it through the gate
+    study_purpose: str = "unknown"
 
 
 @dataclass
 class RetrievalFilters:
     active_only: bool = True
     interventional_only: bool = True
+    treatment_only: bool = True   # drop diagnostic/screening/registry/observational studies
     location: str = ""
 
 
@@ -71,11 +75,31 @@ def retrieve(
     pos_biomarkers = {b.name.upper() for b in profile.positive_biomarkers()}
     neg_low = {b.name.upper(): b.status for b in profile.negative_or_low_biomarkers()}
     therapies = {t.lower() for t in profile.therapy_names()}
+    patient_families = patient_disease_families(profile)
 
     candidates: list[Candidate] = []
     for i, rec in enumerate(index.records):
         if not _passes_hard_filters(rec, profile, filters):
             continue
+
+        # --- Clinical GATES (before any biomarker/lexical overlap is rewarded) ---
+        # Purpose gate: when treatment studies are requested, drop imaging / screening /
+        # prevention / registry / observational studies outright.
+        if filters.treatment_only and rec.study_purpose in NON_TREATMENT_PURPOSES:
+            continue
+        # Disease-family gate: drop wrong-primary-cancer studies. Exception: a
+        # tumour-agnostic basket, or a trial naming a biomarker the patient is positive
+        # for (a biomarker-defined basket), may still apply across tumour types.
+        gate_family = ""
+        if patient_families and rec.disease_families:
+            shared = patient_families & rec.disease_families
+            if shared:
+                gate_family = ", ".join(sorted(shared))
+            else:
+                rec_low = (rec.title + " " + rec.condition_text).lower()
+                is_biomarker_basket = any(m.lower() in rec_low for m in pos_biomarkers)
+                if not (rec.is_basket or is_biomarker_basket):
+                    continue  # wrong primary cancer, not a basket -> reject
 
         rec_blob = (rec.title + " " + rec.condition_text + " " + rec.brief_summary).lower()
         matched_conditions = [c for c in profile.cancer_types if c.lower() in rec_blob]
@@ -101,10 +125,20 @@ def retrieve(
             record=rec, bm25=norm_bm25, structured_overlap=structured, score=score,
             matched_conditions=matched_conditions, matched_biomarkers=matched_biomarkers,
             matched_therapies=matched_therapies, contraindications=contraindications,
+            disease_family=gate_family, study_purpose=rec.study_purpose,
         ))
 
     candidates.sort(key=lambda c: c.score, reverse=True)
     return candidates[:top_k]
+
+
+def patient_disease_families(profile: PatientProfile) -> frozenset[str]:
+    """The patient's primary cancer family/families, from diagnosis + cancer types only
+    (NOT metastatic sites, so a liver metastasis is never read as liver cancer)."""
+    parts = list(profile.cancer_types)
+    if profile.diagnosis:
+        parts.append(profile.diagnosis)
+    return disease_families_of(" ".join(parts))
 
 
 def _build_query_tokens(profile: PatientProfile) -> list[str]:

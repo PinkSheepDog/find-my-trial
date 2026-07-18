@@ -1,0 +1,174 @@
+{
+  "schema_version": "find-my-trial-synthetic-profile-2.0",
+  "synthetic_test_data": true,
+  "not_for_clinical_use": true,
+  "case_id": "case_03_nsclc_egfr_negative_control",
+  "patient_local_id": "SYNTH-LUNG-EGFR-003",
+  "facts": [
+    {
+      "fact_type": "primary_disease",
+      "value": "Metastatic right upper lobe lung adenocarcinoma",
+      "status": "current",
+      "effective_date": "2022-02-11",
+      "source": {
+        "file": "fhir_document_bundle.json",
+        "resource_or_section": "Condition/d516d698-62cd-5767-b7b1-0c4000bc1766",
+        "evidence_text": "Metastatic right upper lobe lung adenocarcinoma"
+      },
+      "review_state": "confirm"
+    },
+    {
+      "fact_type": "disease_family",
+      "value": "non-small cell lung cancer",
+      "status": "current",
+      "effective_date": "2022-02-11",
+      "source": {
+        "file": "fhir_document_bundle.json",
+        "resource_or_section": "Condition/d516d698-62cd-5767-b7b1-0c4000bc1766.note",
+        "evidence_text": "Disease family: non-small cell lung cancer"
+      },
+      "review_state": "confirm"
+    },
+    {
+      "fact_type": "stage",
+      "value": "Stage IVB",
+      "status": "current",
+      "effective_date": "2022-02-11",
+      "source": {
+        "file": "fhir_document_bundle.json",
+        "resource_or_section": "Condition/d516d698-62cd-5767-b7b1-0c4000bc1766.stage",
+        "evidence_text": "Stage IVB"
+      },
+      "review_state": "confirm"
+    },
+    {
+      "fact_type": "metastatic_sites",
+      "value": [
+        "contralateral lung",
+        "adrenal gland"
+      ],
+      "status": "current",
+      "effective_date": "2026-06-12",
+      "source": {
+        "file": "fhir_document_bundle.json",
+        "resource_or_section": "DiagnosticReport/b2030dbd-ff3a-56e9-b8cc-338425936b3b",
+        "evidence_text": "Right upper lobe mass increased with new left lung nodules and enlarging left adrenal lesion. No breast mass described."
+      },
+      "review_state": "confirm"
+    },
+    {
+      "fact_type": "biomarker.egfr",
+      "value": "Exon 19 deletion",
+      "status": "current",
+      "effective_date": "2022-02-14",
+      "method": "NGS",
+      "specimen": "Right lung core biopsy",
+      "source": {
+        "file": "fhir_document_bundle.json",
+        "resource_or_section": "Observation/90c2cbc6-9aa5-592a-8327-44fe36cbce85",
+        "evidence_text": "EGFR Exon 19 deletion"
+      },
+      "review_state": "confirm"
+    },
+    {
+      "fact_type": "biomarker.alk",
+      "value": "No rearrangement detected",
+      "status": "current",
+      "effective_date": "2022-02-14",
+      "method": "NGS",
+      "specimen": "Right lung core biopsy",
+      "source": {
+        "file": "fhir_document_bundle.json",
+        "resource_or_section": "Observation/fe64b9de-15c1-5c8c-9609-e8a48e216624",
+        "evidence_text": "ALK No rearrangement detected"
+      },
+      "review_state": "confirm"
+    },
+    {
+      "fact_type": "biomarker.pd-l1",
+      "value": "TPS 5%",
+      "status": "current",
+      "effective_date": "2022-02-14",
+      "method": "IHC",
+      "specimen": "Right lung core biopsy",
+      "source": {
+        "file": "fhir_document_bundle.json",
+        "resource_or_section": "Observation/60ac92a9-a4c6-5027-9d24-9b37b88c0640",
+        "evidence_text": "PD-L1 TPS 5%"
+      },
+      "review_state": "confirm"
+    },
+    {
+      "fact_type": "treatment_history",
+      "value": "Osimertinib",
+      "status": "stopped",
+      "effective_period": {
+        "start": "2022-03-01",
+        "end": "2024-01-09"
+      },
+      "intent": "First-line metastatic targeted therapy",
+      "outcome": "Stopped after progression",
+      "source": {
+        "file": "fhir_document_bundle.json",
+        "resource_or_section": "treatment_1",
+        "evidence_text": "Osimertinib - Stopped after progression"
+      },
+      "review_state": "confirm"
+    },
+    {
+      "fact_type": "treatment_history",
+      "value": "Carboplatin plus pemetrexed",
+      "status": "completed",
+      "effective_period": {
+        "start": "2024-02-05",
+        "end": "2024-06-17"
+      },
+      "intent": "Subsequent metastatic therapy",
+      "outcome": "Six cycles; stable disease then progression",
+      "source": {
+        "file": "fhir_document_bundle.json",
+        "resource_or_section": "treatment_2",
+        "evidence_text": "Carboplatin plus pemetrexed - Six cycles; stable disease then progression"
+      },
+      "review_state": "confirm"
+    },
+    {
+      "fact_type": "treatment_history",
+      "value": "Pemetrexed maintenance",
+      "status": "stopped",
+      "effective_period": {
+        "start": "2024-07-08",
+        "end": "2025-03-03"
+      },
+      "intent": "Maintenance",
+      "outcome": "Stopped after progression",
+      "source": {
+        "file": "fhir_document_bundle.json",
+        "resource_or_section": "treatment_3",
+        "evidence_text": "Pemetrexed maintenance - Stopped after progression"
+      },
+      "review_state": "confirm"
+    },
+    {
+      "fact_type": "performance_status_ecog",
+      "value": 1,
+      "status": "current",
+      "effective_date": "2026-07-01",
+      "source": {
+        "file": "fhir_document_bundle.json",
+        "resource_or_section": "Observation/273c588a-879a-5ad0-9dfb-742ec2f70f75",
+        "evidence_text": "ECOG 1"
+      },
+      "review_state": "confirm"
+    }
+  ],
+  "missing_or_review_required": [
+    "Resistance-mechanism result from the most recent biopsy"
+  ],
+  "expected_system_behavior": "Never rank breast, melanoma, gastric, or biliary studies solely because PD-L1 or generic oncology language overlaps.",
+  "must_not_infer": [
+    "trial eligibility",
+    "treatment recommendation",
+    "prognosis"
+  ]
+}

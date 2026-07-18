@@ -35,7 +35,7 @@ from app.api.schemas import (
 )
 from app.config import Settings, get_settings
 from app.intake.deident import Deidentifier
-from app.intake.extract_text import extract_text
+from app.intake.extract_text import UploadRejected, extract_text, validate_upload
 from app.matching.pipeline import MatchingPipeline
 from app.security.auth import Session, SessionManager, UserStore
 from app.security.deps import require_session, sign_sid, unsign_sid
@@ -146,9 +146,12 @@ def _set_auth_cookies(response: Response, settings: Settings, sid: str) -> str:
 # --------------------------------------------------------------------------- routes
 @app.get("/health", response_model=HealthResponse)
 async def health(request: Request, settings: Settings = Depends(get_settings)):
+    manifest = request.app.state.index.manifest()
     return HealthResponse(
-        ok=True, trial_count=request.app.state.index.stats()["trial_count"],
+        ok=True, trial_count=manifest["row_count"],
         llm_enabled=settings.llm_enabled, degraded_mode=not settings.llm_enabled,
+        data_current_through=manifest["data_current_through"],
+        normalization_version=manifest["normalization_version"],
     )
 
 
@@ -197,6 +200,10 @@ async def extract_document(
     if len(data) > settings.max_upload_mb * 1024 * 1024:
         raise HTTPException(status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
                             detail=f"File exceeds {settings.max_upload_mb} MB limit")
+    try:
+        validate_upload(file.filename or "", data)
+    except UploadRejected as exc:
+        raise HTTPException(status_code=exc.status_code, detail=str(exc))
     doc = extract_text(file.filename or "upload", data)
     return {"text": doc.text, "source_kind": doc.source_kind,
             "warnings": doc.warnings, "ocr_used": doc.ocr_used}
@@ -233,6 +240,7 @@ async def match_endpoint(
     filters = RetrievalFilters(
         active_only=payload.active_only,
         interventional_only=payload.interventional_only,
+        treatment_only=payload.treatment_only,
         location=payload.location,
     )
     profile, match = await pipeline.run(safe_text, top_k=payload.top_k, filters=filters)

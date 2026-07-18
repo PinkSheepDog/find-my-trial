@@ -1,0 +1,22 @@
+SYNTHETIC TEST DATA - NOT FOR CLINICAL USE
+EHR export combined 07/14/2026. copied sections + addenda. chronology may be mixed.
+
+pt Avery Samplepatient / SYNTH-BREAST-MESSY-002 / F / MI. old 2018 record: left breast IDC,
+ER-/PR-, HER2 0. lumpectomy then AC->taxol. later met recurrence in lung 2024.
+
+copied problem list says capecitabine ACTIVE and 'continue current therapy'. this text was
+copied from 2025. ADDENDUM dated 05/12/26 says CAPECITABINE STOPPED for scan progression.
+medication status must be stopped, not active.
+
+lung bx 05/22/26: ER <1%, PR <1%, HER2 IHC 1+, ISH not amplified. PD-L1 CPS 15.
+historical breast specimen HER2=0. keep both with date/specimen. current metastatic sample
+is the 2026 lung core.
+
+CT 06/28/26 pulmonary nodules slightly larger + small right pleural effusion. NO focal liver
+lesion. NO osseous lesion. do not turn negative statements into metastases.
+
+labs 07/10/26 Hgb 10.8, ANC 3.9, Plt 268, Cr 1.1, AST42 ALT38 Tbili0.7. ECOG 1.
+HTN/DM2. PCN rash. denies tobacco.
+
+wants treatment studies. prefers MI/OH <=~250 mi; treating oncologist coordinates. no
+eligibility decision or treatment recommendation in this export.

@@ -1,0 +1,31 @@
+{
+  "case_id": "case_01_clean_her2_positive_breast",
+  "patient_local_id": "SYNTH-BREAST-HER2-001",
+  "assertions": [
+    {
+      "id": "composition-first",
+      "severity": "error",
+      "assertion": "FHIR Bundle entry[0] is Composition."
+    },
+    {
+      "id": "primary-disease-preserved",
+      "severity": "error",
+      "assertion": "Primary disease family equals breast cancer."
+    },
+    {
+      "id": "purpose-gate",
+      "severity": "error",
+      "assertion": "Treatment query must not be satisfied by imaging, screening, registry, or observational studies."
+    },
+    {
+      "id": "evidence-required",
+      "severity": "error",
+      "assertion": "Every displayed fact and match reason links to a dated source resource/section."
+    },
+    {
+      "id": "no-eligibility-claim",
+      "severity": "error",
+      "assertion": "No output states or implies final eligibility."
+    }
+  ]
+}

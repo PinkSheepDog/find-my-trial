@@ -1,0 +1,46 @@
+{
+  "case_id": "case_02_messy_tnbc_her2_low",
+  "patient_local_id": "SYNTH-BREAST-MESSY-002",
+  "assertions": [
+    {
+      "id": "composition-first",
+      "severity": "error",
+      "assertion": "FHIR Bundle entry[0] is Composition."
+    },
+    {
+      "id": "primary-disease-preserved",
+      "severity": "error",
+      "assertion": "Primary disease family equals breast cancer."
+    },
+    {
+      "id": "purpose-gate",
+      "severity": "error",
+      "assertion": "Treatment query must not be satisfied by imaging, screening, registry, or observational studies."
+    },
+    {
+      "id": "evidence-required",
+      "severity": "error",
+      "assertion": "Every displayed fact and match reason links to a dated source resource/section."
+    },
+    {
+      "id": "no-eligibility-claim",
+      "severity": "error",
+      "assertion": "No output states or implies final eligibility."
+    },
+    {
+      "id": "her2-history",
+      "severity": "error",
+      "assertion": "Historical HER2 IHC 0 and current HER2 IHC 1+/ISH-not-amplified are both retained with specimen/date."
+    },
+    {
+      "id": "copied-forward-medication",
+      "severity": "error",
+      "assertion": "Capecitabine is stopped on 2026-05-12 despite copied-forward 'active' text."
+    },
+    {
+      "id": "negation",
+      "severity": "error",
+      "assertion": "Liver and bone are not extracted as metastatic sites from negative imaging statements."
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "case_id": "case_04_incomplete_pancreatic_abstention",
+  "patient_local_id": "SYNTH-PANC-INCOMPLETE-004",
+  "assertions": [
+    {
+      "id": "composition-first",
+      "severity": "error",
+      "assertion": "FHIR Bundle entry[0] is Composition."
+    },
+    {
+      "id": "primary-disease-preserved",
+      "severity": "error",
+      "assertion": "Primary disease family equals pancreatic cancer."
+    },
+    {
+      "id": "purpose-gate",
+      "severity": "error",
+      "assertion": "Treatment query must not be satisfied by imaging, screening, registry, or observational studies."
+    },
+    {
+      "id": "evidence-required",
+      "severity": "error",
+      "assertion": "Every displayed fact and match reason links to a dated source resource/section."
+    },
+    {
+      "id": "no-eligibility-claim",
+      "severity": "error",
+      "assertion": "No output states or implies final eligibility."
+    },
+    {
+      "id": "abstain",
+      "severity": "error",
+      "assertion": "System returns needs-review/insufficient-data rather than a confident ranked list."
+    },
+    {
+      "id": "pending-not-positive",
+      "severity": "error",
+      "assertion": "Pending KRAS is not normalized as a detected alteration."
+    },
+    {
+      "id": "stale-labs",
+      "severity": "error",
+      "assertion": "May 2026 labs are not presented as current for July 2026 matching without a warning."
+    }
+  ]
+}

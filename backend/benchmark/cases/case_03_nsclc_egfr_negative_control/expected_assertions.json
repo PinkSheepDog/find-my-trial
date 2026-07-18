@@ -1,0 +1,36 @@
+{
+  "case_id": "case_03_nsclc_egfr_negative_control",
+  "patient_local_id": "SYNTH-LUNG-EGFR-003",
+  "assertions": [
+    {
+      "id": "composition-first",
+      "severity": "error",
+      "assertion": "FHIR Bundle entry[0] is Composition."
+    },
+    {
+      "id": "primary-disease-preserved",
+      "severity": "error",
+      "assertion": "Primary disease family equals non-small cell lung cancer."
+    },
+    {
+      "id": "purpose-gate",
+      "severity": "error",
+      "assertion": "Treatment query must not be satisfied by imaging, screening, registry, or observational studies."
+    },
+    {
+      "id": "evidence-required",
+      "severity": "error",
+      "assertion": "Every displayed fact and match reason links to a dated source resource/section."
+    },
+    {
+      "id": "no-eligibility-claim",
+      "severity": "error",
+      "assertion": "No output states or implies final eligibility."
+    },
+    {
+      "id": "wrong-disease-zero",
+      "severity": "error",
+      "assertion": "Breast, melanoma, gastric, and biliary studies do not enter the top candidate set through PD-L1 overlap."
+    }
+  ]
+}

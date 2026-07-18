@@ -11,12 +11,12 @@ from __future__ import annotations
 
 from app.config import Settings
 from app.extraction.llm_extractor import LLMExtractor
+from app.extraction.schema import BiomarkerStatus, PatientProfile
 from app.extraction.rules_extractor import RulesExtractor
-from app.extraction.schema import PatientProfile
 from app.matching.rerank import DeterministicReranker, LLMReranker
 from app.matching.results import MatchResponse
 from app.trials.index import TrialIndex
-from app.trials.retrieve import RetrievalFilters, retrieve
+from app.trials.retrieve import RetrievalFilters, patient_disease_families, retrieve
 
 
 class MatchingPipeline:
@@ -42,6 +42,19 @@ class MatchingPipeline:
         filters: RetrievalFilters | None = None,
     ) -> MatchResponse:
         filters = filters or RetrievalFilters()
+        stats = self._index.stats()
+
+        # Abstention gate: if the profile is too thin, return NEEDS-REVIEW instead of a
+        # confident ranked list (Case 04). Decision support must not over-claim.
+        needs_review, review_reasons = _abstention(profile)
+        if needs_review:
+            return MatchResponse(
+                results=[], candidate_count=0, trial_count=stats["trial_count"],
+                semantic_used=False, degraded_mode=not self._llm_enabled,
+                fallback_hint="Insufficient verified data to rank trials — resolve the items below and re-run.",
+                needs_review=True, review_reasons=review_reasons,
+            )
+
         candidates = retrieve(profile, self._index, filters=filters, top_k=max(top_k * 4, 40))
 
         if self._llm_enabled:
@@ -49,7 +62,6 @@ class MatchingPipeline:
         else:
             results = self._det_reranker.rerank(profile, candidates, top_k)
 
-        stats = self._index.stats()
         return MatchResponse(
             results=results,
             candidate_count=len(candidates),
@@ -77,3 +89,45 @@ class MatchingPipeline:
         if filters.active_only and filters.interventional_only:
             return "No active interventional trials cleared the filters. Try relaxing 'recruiting only' or 'interventional only'."
         return "No trials cleared the current filters. Try broader chart text."
+
+
+# --- Abstention ---------------------------------------------------------------
+# A confident ranked list is only justified when a minimum set of core facts is
+# present. Below the threshold we surface WHAT is missing and abstain.
+_MIN_CORE_FACTS = 3
+
+
+def _abstention(profile: PatientProfile) -> tuple[bool, list[str]]:
+    """Return (needs_review, reasons). Needs review when fewer than _MIN_CORE_FACTS of
+    the core matching facts (disease family, stage/extent, performance status, verified
+    therapy, a definitive biomarker) are present."""
+    present = 0
+    missing: list[str] = []
+
+    if patient_disease_families(profile):
+        present += 1
+    else:
+        missing.append("Primary cancer / disease family")
+
+    if profile.stage or profile.is_metastatic:
+        present += 1
+    else:
+        missing.append("Stage / metastatic extent")
+
+    if profile.ecog is not None:
+        present += 1
+    else:
+        missing.append("Performance status (ECOG/KPS)")
+
+    if profile.therapies:
+        present += 1
+    else:
+        missing.append("Verified treatment history")
+
+    definitive = {BiomarkerStatus.POSITIVE, BiomarkerStatus.NEGATIVE, BiomarkerStatus.LOW}
+    if any(b.status in definitive for b in profile.biomarkers):
+        present += 1
+    else:
+        missing.append("A resolved biomarker result (pending/missing does not count)")
+
+    return (present < _MIN_CORE_FACTS, missing)

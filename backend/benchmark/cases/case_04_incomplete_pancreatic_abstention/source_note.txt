@@ -1,0 +1,14 @@
+SYNTHETIC TEST DATA - NOT FOR CLINICAL USE
+limited outside records for Casey Example (SYNTH-PANC-INCOMPLETE-004).
+
+05/18/26 CT: pancreatic head mass + several liver lesions suspicious for metastases.
+05/20 labs bili 4.8, Cr 0.8. biliary stent 05/21. biopsy says ductal adenocarcinoma.
+molecular panel ordered 06/02: KRAS pending. no result in chart.
+
+no ECOG found. no recent CBC/CMP after stent. no verified chemo administration record.
+allergy field blank. travel/location preferences blank. MSI/MMR not mentioned. germline
+test not mentioned. unclear whether liver lesions were biopsied. do not assume Stage IV from
+the problem-list label alone without review.
+
+referral asks: enough information to search treatment trials? expected system behavior is
+NEEDS REVIEW / INSUFFICIENT DATA, not a confident ranked list.

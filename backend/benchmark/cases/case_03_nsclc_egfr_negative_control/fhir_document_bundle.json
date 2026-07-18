@@ -1,0 +1,1061 @@
+{
+  "resourceType": "Bundle",
+  "id": "case_03_nsclc_egfr_negative_control-document-bundle",
+  "meta": {
+    "versionId": "1",
+    "lastUpdated": "2026-07-14T11:00:00-04:00",
+    "tag": [
+      {
+        "system": "https://example.invalid/tags",
+        "code": "synthetic-test-data",
+        "display": "Synthetic test data - not for clinical use"
+      }
+    ]
+  },
+  "identifier": {
+    "system": "https://example.invalid/bundle-ids",
+    "value": "SYNTH-LUNG-EGFR-003-BUNDLE-V1"
+  },
+  "type": "document",
+  "timestamp": "2026-07-14T11:00:00-04:00",
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:90a1d8fa-99c5-5a6c-a64e-ad9d17ed6b8f",
+      "resource": {
+        "resourceType": "Composition",
+        "id": "90a1d8fa-99c5-5a6c-a64e-ad9d17ed6b8f",
+        "meta": {
+          "versionId": "1",
+          "lastUpdated": "2026-07-14T11:00:00-04:00"
+        },
+        "status": "final",
+        "type": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "34133-9",
+              "display": "Summary of episode note"
+            }
+          ],
+          "text": "Summary of episode note"
+        },
+        "subject": {
+          "reference": "urn:uuid:1b8e4727-acd5-5025-ace6-4bddab023f77"
+        },
+        "encounter": {
+          "reference": "urn:uuid:4b9fbad0-010a-50c3-8288-72b8ccd5df38"
+        },
+        "date": "2026-07-14T11:00:00-04:00",
+        "author": [
+          {
+            "reference": "urn:uuid:eac9f4b4-9a04-517c-9455-67ed2d80150c"
+          }
+        ],
+        "title": "Synthetic Oncology Trial Referral Summary - SYNTH-LUNG-EGFR-003",
+        "confidentiality": "N",
+        "attester": [
+          {
+            "mode": "professional",
+            "time": "2026-07-14T11:00:00-04:00",
+            "party": {
+              "reference": "urn:uuid:eac9f4b4-9a04-517c-9455-67ed2d80150c"
+            }
+          }
+        ],
+        "custodian": {
+          "reference": "urn:uuid:a52a8564-6838-5033-8262-bf6bbc9b6d51"
+        },
+        "text": {
+          "status": "generated",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><b>SYNTHETIC TEST DATA - NOT FOR CLINICAL USE.</b></p><p>Metastatic EGFR-mutated lung adenocarcinoma negative control</p></div>"
+        },
+        "section": [
+          {
+            "title": "Active diagnosis",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "11450-4",
+                  "display": "Problem list"
+                }
+              ],
+              "text": "Problem list"
+            },
+            "text": {
+              "status": "generated",
+              "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Metastatic right upper lobe lung adenocarcinoma; Stage IVB.</p></div>"
+            },
+            "entry": [
+              {
+                "reference": "urn:uuid:d516d698-62cd-5767-b7b1-0c4000bc1766"
+              }
+            ]
+          },
+          {
+            "title": "Pathology and biomarkers",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "30954-2",
+                  "display": "Relevant diagnostic tests/laboratory data"
+                }
+              ],
+              "text": "Relevant diagnostic tests/laboratory data"
+            },
+            "text": {
+              "status": "generated",
+              "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>EGFR Exon 19 deletion (2022-02-14, current); ALK No rearrangement detected (2022-02-14, current); PD-L1 TPS 5% (2022-02-14, current)</p></div>"
+            },
+            "entry": [
+              {
+                "reference": "urn:uuid:117a1d42-9143-5beb-8ec5-3c8c16d9ab09"
+              },
+              {
+                "reference": "urn:uuid:90c2cbc6-9aa5-592a-8327-44fe36cbce85"
+              },
+              {
+                "reference": "urn:uuid:fe64b9de-15c1-5c8c-9609-e8a48e216624"
+              },
+              {
+                "reference": "urn:uuid:60ac92a9-a4c6-5027-9d24-9b37b88c0640"
+              }
+            ]
+          },
+          {
+            "title": "Imaging",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "18748-4",
+                  "display": "Diagnostic imaging study note"
+                }
+              ],
+              "text": "Diagnostic imaging study note"
+            },
+            "text": {
+              "status": "generated",
+              "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Right upper lobe mass increased with new left lung nodules and enlarging left adrenal lesion. No breast mass described.</p></div>"
+            },
+            "entry": [
+              {
+                "reference": "urn:uuid:b2030dbd-ff3a-56e9-b8cc-338425936b3b"
+              }
+            ]
+          },
+          {
+            "title": "Treatment history",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "10160-0",
+                  "display": "History of medication use"
+                }
+              ],
+              "text": "History of medication use"
+            },
+            "text": {
+              "status": "generated",
+              "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>3 dated treatment/procedure records.</p></div>"
+            },
+            "entry": [
+              {
+                "reference": "urn:uuid:d6202ad8-a36c-57bc-983a-7b2ae792a705"
+              },
+              {
+                "reference": "urn:uuid:cf1f0355-5dc8-574f-9e64-368aca63657c"
+              },
+              {
+                "reference": "urn:uuid:511731aa-b1c2-56d4-862f-a32440bb68c0"
+              }
+            ]
+          },
+          {
+            "title": "Current status and labs",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "8716-3",
+                  "display": "Vital signs"
+                }
+              ],
+              "text": "Vital signs"
+            },
+            "text": {
+              "status": "generated",
+              "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>ECOG 1; 4 dated lab results.</p></div>"
+            },
+            "entry": [
+              {
+                "reference": "urn:uuid:273c588a-879a-5ad0-9dfb-742ec2f70f75"
+              },
+              {
+                "reference": "urn:uuid:50c7935e-5d59-5478-94c2-1f2bcd5947b5"
+              },
+              {
+                "reference": "urn:uuid:1e86fdcb-3662-5a73-85b1-3ef5f356730c"
+              },
+              {
+                "reference": "urn:uuid:2231584f-b306-5082-a66b-bf3bc88dba38"
+              },
+              {
+                "reference": "urn:uuid:4b5eae2e-bb68-571b-8e6b-6d924a2c4843"
+              }
+            ]
+          },
+          {
+            "title": "Referral and preferences",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "18776-5",
+                  "display": "Plan of care note"
+                }
+              ],
+              "text": "Plan of care note"
+            },
+            "text": {
+              "status": "generated",
+              "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Prefers Ohio or Michigan; approximately 300-mile radius.</p><p>Identify recruiting treatment studies for EGFR-mutated metastatic non-small cell lung cancer after osimertinib and platinum therapy.</p></div>"
+            },
+            "entry": [
+              {
+                "reference": "urn:uuid:a1c346b1-6928-55cc-8eea-a38043d6855d"
+              },
+              {
+                "reference": "urn:uuid:bf9b10cb-6fd5-5097-9d8b-abaecf5ab40f"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:1b8e4727-acd5-5025-ace6-4bddab023f77",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "1b8e4727-acd5-5025-ace6-4bddab023f77",
+        "identifier": [
+          {
+            "system": "https://example.invalid/patient-ids",
+            "value": "SYNTH-LUNG-EGFR-003"
+          }
+        ],
+        "active": true,
+        "name": [
+          {
+            "family": "Testrecord",
+            "given": [
+              "Riley"
+            ]
+          }
+        ],
+        "gender": "male",
+        "birthDate": "1958-09-02",
+        "address": [
+          {
+            "state": "OH",
+            "country": "US"
+          }
+        ],
+        "text": {
+          "status": "generated",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>Riley Testrecord, synthetic patient SYNTH-LUNG-EGFR-003.</p></div>"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:eac9f4b4-9a04-517c-9455-67ed2d80150c",
+      "resource": {
+        "resourceType": "Practitioner",
+        "id": "eac9f4b4-9a04-517c-9455-67ed2d80150c",
+        "identifier": [
+          {
+            "system": "https://example.invalid/clinician-ids",
+            "value": "SYNTH-CLIN-rol"
+          }
+        ],
+        "name": [
+          {
+            "family": "Clinician",
+            "given": [
+              "Taylor"
+            ],
+            "prefix": [
+              "Dr."
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:a52a8564-6838-5033-8262-bf6bbc9b6d51",
+      "resource": {
+        "resourceType": "Organization",
+        "id": "a52a8564-6838-5033-8262-bf6bbc9b6d51",
+        "active": true,
+        "name": "Example Oncology Center - Synthetic",
+        "address": [
+          {
+            "state": "OH",
+            "country": "US"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:4b9fbad0-010a-50c3-8288-72b8ccd5df38",
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "4b9fbad0-010a-50c3-8288-72b8ccd5df38",
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB",
+          "display": "ambulatory"
+        },
+        "type": [
+          {
+            "text": "Synthetic oncology consultation"
+          }
+        ],
+        "subject": {
+          "reference": "urn:uuid:1b8e4727-acd5-5025-ace6-4bddab023f77"
+        },
+        "period": {
+          "start": "2026-07-14T09:00:00-04:00",
+          "end": "2026-07-14T09:45:00-04:00"
+        },
+        "serviceProvider": {
+          "reference": "urn:uuid:a52a8564-6838-5033-8262-bf6bbc9b6d51"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:d516d698-62cd-5767-b7b1-0c4000bc1766",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "d516d698-62cd-5767-b7b1-0c4000bc1766",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active",
+              "display": "Active"
+            }
+          ],
+          "text": "Active"
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed",
+              "display": "Confirmed"
+            }
+          ],
+          "text": "Confirmed"
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ],
+            "text": "Problem List Item"
+          }
+        ],
+        "code": {
+          "text": "Metastatic right upper lobe lung adenocarcinoma"
+        },
+        "bodySite": [
+          {
+            "text": "right upper lobe lung"
+          }
+        ],
+        "subject": {
+          "reference": "urn:uuid:1b8e4727-acd5-5025-ace6-4bddab023f77"
+        },
+        "onsetDateTime": "2022-02-11",
+        "recordedDate": "2026-07-14",
+        "stage": [
+          {
+            "summary": {
+              "text": "Stage IVB"
+            }
+          }
+        ],
+        "note": [
+          {
+            "text": "Disease family: non-small cell lung cancer. Metastatic sites: contralateral lung, adrenal gland."
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:90c2cbc6-9aa5-592a-8327-44fe36cbce85",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "90c2cbc6-9aa5-592a-8327-44fe36cbce85",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory",
+                "display": "Laboratory"
+              }
+            ],
+            "text": "Laboratory"
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "https://example.invalid/codes/oncology",
+              "code": "biomarker_1",
+              "display": "EGFR"
+            }
+          ],
+          "text": "EGFR"
+        },
+        "subject": {
+          "reference": "urn:uuid:1b8e4727-acd5-5025-ace6-4bddab023f77"
+        },
+        "effectiveDateTime": "2022-02-14",
+        "valueString": "Exon 19 deletion",
+        "note": [
+          {
+            "text": "Status: current; specimen: Right lung core biopsy; method: NGS."
+          }
+        ],
+        "specimen": {
+          "display": "Right lung core biopsy"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:fe64b9de-15c1-5c8c-9609-e8a48e216624",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "fe64b9de-15c1-5c8c-9609-e8a48e216624",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory",
+                "display": "Laboratory"
+              }
+            ],
+            "text": "Laboratory"
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "https://example.invalid/codes/oncology",
+              "code": "biomarker_2",
+              "display": "ALK"
+            }
+          ],
+          "text": "ALK"
+        },
+        "subject": {
+          "reference": "urn:uuid:1b8e4727-acd5-5025-ace6-4bddab023f77"
+        },
+        "effectiveDateTime": "2022-02-14",
+        "valueString": "No rearrangement detected",
+        "note": [
+          {
+            "text": "Status: current; specimen: Right lung core biopsy; method: NGS."
+          }
+        ],
+        "specimen": {
+          "display": "Right lung core biopsy"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:60ac92a9-a4c6-5027-9d24-9b37b88c0640",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "60ac92a9-a4c6-5027-9d24-9b37b88c0640",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory",
+                "display": "Laboratory"
+              }
+            ],
+            "text": "Laboratory"
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "https://example.invalid/codes/oncology",
+              "code": "biomarker_3",
+              "display": "PD-L1"
+            }
+          ],
+          "text": "PD-L1"
+        },
+        "subject": {
+          "reference": "urn:uuid:1b8e4727-acd5-5025-ace6-4bddab023f77"
+        },
+        "effectiveDateTime": "2022-02-14",
+        "valueString": "TPS 5%",
+        "note": [
+          {
+            "text": "Status: current; specimen: Right lung core biopsy; method: IHC."
+          }
+        ],
+        "specimen": {
+          "display": "Right lung core biopsy"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:117a1d42-9143-5beb-8ec5-3c8c16d9ab09",
+      "resource": {
+        "resourceType": "DiagnosticReport",
+        "id": "117a1d42-9143-5beb-8ec5-3c8c16d9ab09",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+                "code": "PAT",
+                "display": "Pathology"
+              }
+            ],
+            "text": "Pathology"
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "11526-1",
+              "display": "Pathology study"
+            }
+          ],
+          "text": "Pathology study"
+        },
+        "subject": {
+          "reference": "urn:uuid:1b8e4727-acd5-5025-ace6-4bddab023f77"
+        },
+        "encounter": {
+          "reference": "urn:uuid:4b9fbad0-010a-50c3-8288-72b8ccd5df38"
+        },
+        "effectiveDateTime": "2022-02-14",
+        "issued": "2026-07-14T08:30:00-04:00",
+        "performer": [
+          {
+            "reference": "urn:uuid:a52a8564-6838-5033-8262-bf6bbc9b6d51"
+          }
+        ],
+        "result": [
+          {
+            "reference": "urn:uuid:90c2cbc6-9aa5-592a-8327-44fe36cbce85"
+          },
+          {
+            "reference": "urn:uuid:fe64b9de-15c1-5c8c-9609-e8a48e216624"
+          },
+          {
+            "reference": "urn:uuid:60ac92a9-a4c6-5027-9d24-9b37b88c0640"
+          }
+        ],
+        "conclusion": "EGFR Exon 19 deletion (2022-02-14, current); ALK No rearrangement detected (2022-02-14, current); PD-L1 TPS 5% (2022-02-14, current)",
+        "presentedForm": [
+          {
+            "contentType": "text/plain",
+            "data": "RUdGUiBFeG9uIDE5IGRlbGV0aW9uICgyMDIyLTAyLTE0LCBjdXJyZW50KTsgQUxLIE5vIHJlYXJyYW5nZW1lbnQgZGV0ZWN0ZWQgKDIwMjItMDItMTQsIGN1cnJlbnQpOyBQRC1MMSBUUFMgNSUgKDIwMjItMDItMTQsIGN1cnJlbnQp",
+            "title": "Synthetic pathology narrative"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:b2030dbd-ff3a-56e9-b8cc-338425936b3b",
+      "resource": {
+        "resourceType": "DiagnosticReport",
+        "id": "b2030dbd-ff3a-56e9-b8cc-338425936b3b",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+                "code": "RAD",
+                "display": "Radiology"
+              }
+            ],
+            "text": "Radiology"
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "18748-4",
+              "display": "Diagnostic imaging study note"
+            }
+          ],
+          "text": "Diagnostic imaging study note"
+        },
+        "subject": {
+          "reference": "urn:uuid:1b8e4727-acd5-5025-ace6-4bddab023f77"
+        },
+        "effectiveDateTime": "2026-06-12",
+        "issued": "2026-06-12T15:00:00-04:00",
+        "performer": [
+          {
+            "reference": "urn:uuid:a52a8564-6838-5033-8262-bf6bbc9b6d51"
+          }
+        ],
+        "conclusion": "Right upper lobe mass increased with new left lung nodules and enlarging left adrenal lesion. No breast mass described. Impression: Progressive metastatic lung cancer."
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:d6202ad8-a36c-57bc-983a-7b2ae792a705",
+      "resource": {
+        "resourceType": "MedicationAdministration",
+        "id": "d6202ad8-a36c-57bc-983a-7b2ae792a705",
+        "status": "completed",
+        "medicationCodeableConcept": {
+          "text": "Osimertinib"
+        },
+        "subject": {
+          "reference": "urn:uuid:1b8e4727-acd5-5025-ace6-4bddab023f77"
+        },
+        "context": {
+          "reference": "urn:uuid:4b9fbad0-010a-50c3-8288-72b8ccd5df38"
+        },
+        "effectivePeriod": {
+          "start": "2022-03-01",
+          "end": "2024-01-09"
+        },
+        "reasonReference": [
+          {
+            "reference": "urn:uuid:d516d698-62cd-5767-b7b1-0c4000bc1766"
+          }
+        ],
+        "note": [
+          {
+            "text": "Source status: stopped; intent: First-line metastatic targeted therapy; outcome: Stopped after progression"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:cf1f0355-5dc8-574f-9e64-368aca63657c",
+      "resource": {
+        "resourceType": "MedicationAdministration",
+        "id": "cf1f0355-5dc8-574f-9e64-368aca63657c",
+        "status": "completed",
+        "medicationCodeableConcept": {
+          "text": "Carboplatin plus pemetrexed"
+        },
+        "subject": {
+          "reference": "urn:uuid:1b8e4727-acd5-5025-ace6-4bddab023f77"
+        },
+        "context": {
+          "reference": "urn:uuid:4b9fbad0-010a-50c3-8288-72b8ccd5df38"
+        },
+        "effectivePeriod": {
+          "start": "2024-02-05",
+          "end": "2024-06-17"
+        },
+        "reasonReference": [
+          {
+            "reference": "urn:uuid:d516d698-62cd-5767-b7b1-0c4000bc1766"
+          }
+        ],
+        "note": [
+          {
+            "text": "Source status: completed; intent: Subsequent metastatic therapy; outcome: Six cycles; stable disease then progression"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:511731aa-b1c2-56d4-862f-a32440bb68c0",
+      "resource": {
+        "resourceType": "MedicationAdministration",
+        "id": "511731aa-b1c2-56d4-862f-a32440bb68c0",
+        "status": "completed",
+        "medicationCodeableConcept": {
+          "text": "Pemetrexed maintenance"
+        },
+        "subject": {
+          "reference": "urn:uuid:1b8e4727-acd5-5025-ace6-4bddab023f77"
+        },
+        "context": {
+          "reference": "urn:uuid:4b9fbad0-010a-50c3-8288-72b8ccd5df38"
+        },
+        "effectivePeriod": {
+          "start": "2024-07-08",
+          "end": "2025-03-03"
+        },
+        "reasonReference": [
+          {
+            "reference": "urn:uuid:d516d698-62cd-5767-b7b1-0c4000bc1766"
+          }
+        ],
+        "note": [
+          {
+            "text": "Source status: stopped; intent: Maintenance; outcome: Stopped after progression"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:273c588a-879a-5ad0-9dfb-742ec2f70f75",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "273c588a-879a-5ad0-9dfb-742ec2f70f75",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory",
+                "display": "Laboratory"
+              }
+            ],
+            "text": "Laboratory"
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "https://example.invalid/codes/oncology",
+              "code": "ecog",
+              "display": "ECOG performance status"
+            }
+          ],
+          "text": "ECOG performance status"
+        },
+        "subject": {
+          "reference": "urn:uuid:1b8e4727-acd5-5025-ace6-4bddab023f77"
+        },
+        "effectiveDateTime": "2026-07-01",
+        "valueQuantity": {
+          "value": 1,
+          "unit": "{score}",
+          "system": "http://unitsofmeasure.org",
+          "code": "{score}"
+        },
+        "note": [
+          {
+            "text": "Current performance status"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:50c7935e-5d59-5478-94c2-1f2bcd5947b5",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "50c7935e-5d59-5478-94c2-1f2bcd5947b5",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory",
+                "display": "Laboratory"
+              }
+            ],
+            "text": "Laboratory"
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "718-7",
+              "display": "Hemoglobin"
+            }
+          ],
+          "text": "Hemoglobin"
+        },
+        "subject": {
+          "reference": "urn:uuid:1b8e4727-acd5-5025-ace6-4bddab023f77"
+        },
+        "effectiveDateTime": "2026-07-01",
+        "valueQuantity": {
+          "value": 11.4,
+          "unit": "g/dL",
+          "system": "http://unitsofmeasure.org",
+          "code": "g/dL"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:1e86fdcb-3662-5a73-85b1-3ef5f356730c",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "1e86fdcb-3662-5a73-85b1-3ef5f356730c",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory",
+                "display": "Laboratory"
+              }
+            ],
+            "text": "Laboratory"
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "751-8",
+              "display": "Absolute neutrophil count"
+            }
+          ],
+          "text": "Absolute neutrophil count"
+        },
+        "subject": {
+          "reference": "urn:uuid:1b8e4727-acd5-5025-ace6-4bddab023f77"
+        },
+        "effectiveDateTime": "2026-07-01",
+        "valueQuantity": {
+          "value": 4.8,
+          "unit": "10*3/uL",
+          "system": "http://unitsofmeasure.org",
+          "code": "10*3/uL"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:2231584f-b306-5082-a66b-bf3bc88dba38",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "2231584f-b306-5082-a66b-bf3bc88dba38",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory",
+                "display": "Laboratory"
+              }
+            ],
+            "text": "Laboratory"
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "777-3",
+              "display": "Platelets"
+            }
+          ],
+          "text": "Platelets"
+        },
+        "subject": {
+          "reference": "urn:uuid:1b8e4727-acd5-5025-ace6-4bddab023f77"
+        },
+        "effectiveDateTime": "2026-07-01",
+        "valueQuantity": {
+          "value": 301,
+          "unit": "10*3/uL",
+          "system": "http://unitsofmeasure.org",
+          "code": "10*3/uL"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:4b5eae2e-bb68-571b-8e6b-6d924a2c4843",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "4b5eae2e-bb68-571b-8e6b-6d924a2c4843",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "laboratory",
+                "display": "Laboratory"
+              }
+            ],
+            "text": "Laboratory"
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "2160-0",
+              "display": "Creatinine"
+            }
+          ],
+          "text": "Creatinine"
+        },
+        "subject": {
+          "reference": "urn:uuid:1b8e4727-acd5-5025-ace6-4bddab023f77"
+        },
+        "effectiveDateTime": "2026-07-01",
+        "valueQuantity": {
+          "value": 1.0,
+          "unit": "mg/dL",
+          "system": "http://unitsofmeasure.org",
+          "code": "mg/dL"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:bf9b10cb-6fd5-5097-9d8b-abaecf5ab40f",
+      "resource": {
+        "resourceType": "DocumentReference",
+        "id": "bf9b10cb-6fd5-5097-9d8b-abaecf5ab40f",
+        "masterIdentifier": {
+          "system": "https://example.invalid/document-ids",
+          "value": "SYNTH-LUNG-EGFR-003-NOTE-V1"
+        },
+        "status": "current",
+        "type": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "11506-3",
+              "display": "Progress note"
+            }
+          ],
+          "text": "Progress note"
+        },
+        "category": [
+          {
+            "text": "Clinical note"
+          }
+        ],
+        "subject": {
+          "reference": "urn:uuid:1b8e4727-acd5-5025-ace6-4bddab023f77"
+        },
+        "date": "2026-07-14T09:45:00-04:00",
+        "author": [
+          {
+            "reference": "urn:uuid:eac9f4b4-9a04-517c-9455-67ed2d80150c"
+          }
+        ],
+        "custodian": {
+          "reference": "urn:uuid:a52a8564-6838-5033-8262-bf6bbc9b6d51"
+        },
+        "content": [
+          {
+            "attachment": {
+              "contentType": "text/plain",
+              "language": "en-US",
+              "data": "ICAgICAgICBTWU5USEVUSUMgVEVTVCBEQVRBIC0gTk9UIEZPUiBDTElOSUNBTCBVU0UKICAgICAgICBPTkNPTE9HWSBDT05TVUxUIE5PVEUKICAgICAgICBQYXRpZW50OiBSaWxleSBUZXN0cmVjb3JkIHwgSUQ6IFNZTlRILUxVTkctRUdGUi0wMDMgfCBET0I6IDE5NTgtMDktMDIgfCBTdGF0ZTogT0gKCiAgICAgICAgQXNzZXNzbWVudDogTWV0YXN0YXRpYyByaWdodCB1cHBlciBsb2JlIGx1bmcgYWRlbm9jYXJjaW5vbWE7IFN0YWdlIElWQi4gU2l0ZXM6IGNvbnRyYWxhdGVyYWwgbHVuZywgYWRyZW5hbCBnbGFuZC4KICAgICAgICBDdXJyZW50IHN0YXR1czogUHJvZ3Jlc3Npb24gYWZ0ZXIgdGFyZ2V0ZWQgdGhlcmFweSBhbmQgcGxhdGludW0vcGVtZXRyZXhlZC4KCiAgICAgICAgQmlvbWFya2VyczogRUdGUiBFeG9uIDE5IGRlbGV0aW9uICgyMDIyLTAyLTE0LCBSaWdodCBsdW5nIGNvcmUgYmlvcHN5KTsgQUxLIE5vIHJlYXJyYW5nZW1lbnQgZGV0ZWN0ZWQgKDIwMjItMDItMTQsIFJpZ2h0IGx1bmcgY29yZSBiaW9wc3kpOyBQRC1MMSBUUFMgNSUgKDIwMjItMDItMTQsIFJpZ2h0IGx1bmcgY29yZSBiaW9wc3kpLgoKICAgICAgICBUcmVhdG1lbnQgaGlzdG9yeToKICAgICAgICAtIDIwMjItMDMtMDEgdG8gMjAyNC0wMS0wOTogT3NpbWVydGluaWIgW3N0b3BwZWRdOyBTdG9wcGVkIGFmdGVyIHByb2dyZXNzaW9uCi0gMjAyNC0wMi0wNSB0byAyMDI0LTA2LTE3OiBDYXJib3BsYXRpbiBwbHVzIHBlbWV0cmV4ZWQgW2NvbXBsZXRlZF07IFNpeCBjeWNsZXM7IHN0YWJsZSBkaXNlYXNlIHRoZW4gcHJvZ3Jlc3Npb24KLSAyMDI0LTA3LTA4IHRvIDIwMjUtMDMtMDM6IFBlbWV0cmV4ZWQgbWFpbnRlbmFuY2UgW3N0b3BwZWRdOyBTdG9wcGVkIGFmdGVyIHByb2dyZXNzaW9uCgogICAgICAgIEltYWdpbmcgMjAyNi0wNi0xMjogUmlnaHQgdXBwZXIgbG9iZSBtYXNzIGluY3JlYXNlZCB3aXRoIG5ldyBsZWZ0IGx1bmcgbm9kdWxlcyBhbmQgZW5sYXJnaW5nIGxlZnQgYWRyZW5hbCBsZXNpb24uIE5vIGJyZWFzdCBtYXNzIGRlc2NyaWJlZC4gSW1wcmVzc2lvbjogUHJvZ3Jlc3NpdmUgbWV0YXN0YXRpYyBsdW5nIGNhbmNlci4KICAgICAgICBQZXJmb3JtYW5jZTogRUNPRyAxIG9uIDIwMjYtMDctMDEuCiAgICAgICAgTGFiczogSGVtb2dsb2JpbiAxMS40IGcvZEwgKDIwMjYtMDctMDEpLCBBYnNvbHV0ZSBuZXV0cm9waGlsIGNvdW50IDQuOCAxMCozL3VMICgyMDI2LTA3LTAxKSwgUGxhdGVsZXRzIDMwMSAxMCozL3VMICgyMDI2LTA3LTAxKSwgQ3JlYXRpbmluZSAxLjAgbWcvZEwgKDIwMjYtMDctMDEpLgogICAgICAgIENvbW9yYmlkaXRpZXM6IENocm9uaWMgb2JzdHJ1Y3RpdmUgcHVsbW9uYXJ5IGRpc2Vhc2UsIEh5cGVybGlwaWRlbWlhLiBBbGxlcmdpZXM6IE5vIGtub3duIGRydWcgYWxsZXJnaWVzLgogICAgICAgIFByZWZlcmVuY2VzOiBQcmVmZXJzIE9oaW8gb3IgTWljaGlnYW47IGFwcHJveGltYXRlbHkgMzAwLW1pbGUgcmFkaXVzLgoKICAgICAgICBSZWZlcnJhbCBxdWVzdGlvbjogSWRlbnRpZnkgcmVjcnVpdGluZyB0cmVhdG1lbnQgc3R1ZGllcyBmb3IgRUdGUi1tdXRhdGVkIG1ldGFzdGF0aWMgbm9uLXNtYWxsIGNlbGwgbHVuZyBjYW5jZXIgYWZ0ZXIgb3NpbWVydGluaWIgYW5kIHBsYXRpbnVtIHRoZXJhcHkuCiAgICAgICAgU2FmZXR5OiByZXR1cm4gY2FuZGlkYXRlcyBhbmQgbWlzc2luZyBkYXRhIGZvciBjbGluaWNpYW4gcmV2aWV3IG9ubHkuIERvIG5vdCBpbmZlciBlbGlnaWJpbGl0eSwKICAgICAgICByZWNvbW1lbmQgdHJlYXRtZW50LCBvciBwcmVkaWN0IG91dGNvbWUuCg==",
+              "title": "Synthetic source note"
+            }
+          }
+        ],
+        "context": {
+          "encounter": [
+            {
+              "reference": "urn:uuid:4b9fbad0-010a-50c3-8288-72b8ccd5df38"
+            }
+          ],
+          "period": {
+            "start": "2026-07-14T09:00:00-04:00",
+            "end": "2026-07-14T09:45:00-04:00"
+          }
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:a1c346b1-6928-55cc-8eea-a38043d6855d",
+      "resource": {
+        "resourceType": "ServiceRequest",
+        "id": "a1c346b1-6928-55cc-8eea-a38043d6855d",
+        "status": "active",
+        "intent": "order",
+        "code": {
+          "text": "Clinical trial matching review"
+        },
+        "subject": {
+          "reference": "urn:uuid:1b8e4727-acd5-5025-ace6-4bddab023f77"
+        },
+        "encounter": {
+          "reference": "urn:uuid:4b9fbad0-010a-50c3-8288-72b8ccd5df38"
+        },
+        "authoredOn": "2026-07-14",
+        "requester": {
+          "reference": "urn:uuid:eac9f4b4-9a04-517c-9455-67ed2d80150c"
+        },
+        "reasonReference": [
+          {
+            "reference": "urn:uuid:d516d698-62cd-5767-b7b1-0c4000bc1766"
+          }
+        ],
+        "patientInstruction": "Identify recruiting treatment studies for EGFR-mutated metastatic non-small cell lung cancer after osimertinib and platinum therapy.",
+        "note": [
+          {
+            "text": "Software test referral only. Do not infer eligibility or recommend treatment."
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:8995feee-0ec9-59ff-a1af-cf666def1549",
+      "resource": {
+        "resourceType": "Provenance",
+        "id": "8995feee-0ec9-59ff-a1af-cf666def1549",
+        "target": [
+          {
+            "reference": "urn:uuid:90a1d8fa-99c5-5a6c-a64e-ad9d17ed6b8f"
+          }
+        ],
+        "recorded": "2026-07-14T11:00:00-04:00",
+        "activity": {
+          "text": "Synthetic corpus assembly"
+        },
+        "agent": [
+          {
+            "type": {
+              "text": "Assembler"
+            },
+            "who": {
+              "reference": "urn:uuid:a52a8564-6838-5033-8262-bf6bbc9b6d51"
+            }
+          }
+        ],
+        "entity": [
+          {
+            "role": "source",
+            "what": {
+              "reference": "urn:uuid:bf9b10cb-6fd5-5097-9d8b-abaecf5ab40f"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

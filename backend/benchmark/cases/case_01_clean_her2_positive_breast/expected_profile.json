@@ -1,0 +1,208 @@
+{
+  "schema_version": "find-my-trial-synthetic-profile-2.0",
+  "synthetic_test_data": true,
+  "not_for_clinical_use": true,
+  "case_id": "case_01_clean_her2_positive_breast",
+  "patient_local_id": "SYNTH-BREAST-HER2-001",
+  "facts": [
+    {
+      "fact_type": "primary_disease",
+      "value": "Metastatic left breast invasive ductal carcinoma",
+      "status": "current",
+      "effective_date": "2020-08-14",
+      "source": {
+        "file": "fhir_document_bundle.json",
+        "resource_or_section": "Condition/b08170e0-bc88-5671-b981-a7ae8c6ea60c",
+        "evidence_text": "Metastatic left breast invasive ductal carcinoma"
+      },
+      "review_state": "confirm"
+    },
+    {
+      "fact_type": "disease_family",
+      "value": "breast cancer",
+      "status": "current",
+      "effective_date": "2020-08-14",
+      "source": {
+        "file": "fhir_document_bundle.json",
+        "resource_or_section": "Condition/b08170e0-bc88-5671-b981-a7ae8c6ea60c.note",
+        "evidence_text": "Disease family: breast cancer"
+      },
+      "review_state": "confirm"
+    },
+    {
+      "fact_type": "stage",
+      "value": "Stage IV",
+      "status": "current",
+      "effective_date": "2020-08-14",
+      "source": {
+        "file": "fhir_document_bundle.json",
+        "resource_or_section": "Condition/b08170e0-bc88-5671-b981-a7ae8c6ea60c.stage",
+        "evidence_text": "Stage IV"
+      },
+      "review_state": "confirm"
+    },
+    {
+      "fact_type": "metastatic_sites",
+      "value": [
+        "liver",
+        "bone"
+      ],
+      "status": "current",
+      "effective_date": "2026-06-20",
+      "source": {
+        "file": "fhir_document_bundle.json",
+        "resource_or_section": "DiagnosticReport/10c04509-7638-5447-8db6-008ae96b3d9b",
+        "evidence_text": "Multiple enlarging liver lesions and diffuse osseous metastases; no lung involvement."
+      },
+      "review_state": "confirm"
+    },
+    {
+      "fact_type": "biomarker.her2",
+      "value": "IHC 3+",
+      "status": "current",
+      "effective_date": "2026-05-30",
+      "method": "IHC",
+      "specimen": "Liver core biopsy",
+      "source": {
+        "file": "fhir_document_bundle.json",
+        "resource_or_section": "Observation/f9a7bfa2-4318-53f1-b45c-ec1399a97f75",
+        "evidence_text": "HER2 IHC 3+"
+      },
+      "review_state": "confirm"
+    },
+    {
+      "fact_type": "biomarker.er",
+      "value": "Negative (<1%)",
+      "status": "current",
+      "effective_date": "2026-05-30",
+      "method": "IHC",
+      "specimen": "Liver core biopsy",
+      "source": {
+        "file": "fhir_document_bundle.json",
+        "resource_or_section": "Observation/64b4f0b5-9ca4-57a9-bd21-64a6b2db7618",
+        "evidence_text": "ER Negative (<1%)"
+      },
+      "review_state": "confirm"
+    },
+    {
+      "fact_type": "biomarker.pr",
+      "value": "Negative (<1%)",
+      "status": "current",
+      "effective_date": "2026-05-30",
+      "method": "IHC",
+      "specimen": "Liver core biopsy",
+      "source": {
+        "file": "fhir_document_bundle.json",
+        "resource_or_section": "Observation/ab2b634f-06ae-5cc4-9d4c-8e045ffa5dc7",
+        "evidence_text": "PR Negative (<1%)"
+      },
+      "review_state": "confirm"
+    },
+    {
+      "fact_type": "treatment_history",
+      "value": "Left lumpectomy",
+      "status": "completed",
+      "effective_period": {
+        "start": "2014-07-08",
+        "end": "2014-07-08"
+      },
+      "intent": "Definitive local therapy",
+      "outcome": "Completed",
+      "source": {
+        "file": "fhir_document_bundle.json",
+        "resource_or_section": "treatment_1",
+        "evidence_text": "Left lumpectomy - Completed"
+      },
+      "review_state": "confirm"
+    },
+    {
+      "fact_type": "treatment_history",
+      "value": "Doxorubicin/cyclophosphamide followed by paclitaxel",
+      "status": "completed",
+      "effective_period": {
+        "start": "2014-08-01",
+        "end": "2015-01-22"
+      },
+      "intent": "Adjuvant",
+      "outcome": "Completed",
+      "source": {
+        "file": "fhir_document_bundle.json",
+        "resource_or_section": "treatment_2",
+        "evidence_text": "Doxorubicin/cyclophosphamide followed by paclitaxel - Completed"
+      },
+      "review_state": "confirm"
+    },
+    {
+      "fact_type": "treatment_history",
+      "value": "Trastuzumab",
+      "status": "completed",
+      "effective_period": {
+        "start": "2014-08-01",
+        "end": "2015-08-01"
+      },
+      "intent": "Adjuvant HER2-directed",
+      "outcome": "Completed",
+      "source": {
+        "file": "fhir_document_bundle.json",
+        "resource_or_section": "treatment_3",
+        "evidence_text": "Trastuzumab - Completed"
+      },
+      "review_state": "confirm"
+    },
+    {
+      "fact_type": "treatment_history",
+      "value": "Paclitaxel plus trastuzumab plus pertuzumab",
+      "status": "completed",
+      "effective_period": {
+        "start": "2020-09-01",
+        "end": "2021-03-22"
+      },
+      "intent": "First-line metastatic",
+      "outcome": "Partial response, then progression",
+      "source": {
+        "file": "fhir_document_bundle.json",
+        "resource_or_section": "treatment_4",
+        "evidence_text": "Paclitaxel plus trastuzumab plus pertuzumab - Partial response, then progression"
+      },
+      "review_state": "confirm"
+    },
+    {
+      "fact_type": "treatment_history",
+      "value": "Trastuzumab emtansine",
+      "status": "stopped",
+      "effective_period": {
+        "start": "2021-04-12",
+        "end": "2023-02-06"
+      },
+      "intent": "Subsequent metastatic",
+      "outcome": "Stopped after progression",
+      "source": {
+        "file": "fhir_document_bundle.json",
+        "resource_or_section": "treatment_5",
+        "evidence_text": "Trastuzumab emtansine - Stopped after progression"
+      },
+      "review_state": "confirm"
+    },
+    {
+      "fact_type": "performance_status_ecog",
+      "value": 1,
+      "status": "current",
+      "effective_date": "2026-07-08",
+      "source": {
+        "file": "fhir_document_bundle.json",
+        "resource_or_section": "Observation/ff999b34-5311-5167-b5ce-4c014e0c004d",
+        "evidence_text": "ECOG 1"
+      },
+      "review_state": "confirm"
+    }
+  ],
+  "missing_or_review_required": [
+    "Exact cardiac ejection fraction date within each trial's required window"
+  ],
+  "expected_system_behavior": "Return breast-cancer treatment candidates only after structured disease and purpose gating; preserve prior HER2 therapies.",
+  "must_not_infer": [
+    "trial eligibility",
+    "treatment recommendation",
+    "prognosis"
+  ]
+}

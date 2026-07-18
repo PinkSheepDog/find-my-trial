@@ -1,0 +1,220 @@
+{
+  "schema_version": "find-my-trial-synthetic-profile-2.0",
+  "synthetic_test_data": true,
+  "not_for_clinical_use": true,
+  "case_id": "case_02_messy_tnbc_her2_low",
+  "patient_local_id": "SYNTH-BREAST-MESSY-002",
+  "facts": [
+    {
+      "fact_type": "primary_disease",
+      "value": "Metastatic left breast invasive ductal carcinoma",
+      "status": "current",
+      "effective_date": "2024-02-19",
+      "source": {
+        "file": "fhir_document_bundle.json",
+        "resource_or_section": "Condition/04856e12-57f2-591d-afb0-9bd91f034f3a",
+        "evidence_text": "Metastatic left breast invasive ductal carcinoma"
+      },
+      "review_state": "confirm"
+    },
+    {
+      "fact_type": "disease_family",
+      "value": "breast cancer",
+      "status": "current",
+      "effective_date": "2024-02-19",
+      "source": {
+        "file": "fhir_document_bundle.json",
+        "resource_or_section": "Condition/04856e12-57f2-591d-afb0-9bd91f034f3a.note",
+        "evidence_text": "Disease family: breast cancer"
+      },
+      "review_state": "confirm"
+    },
+    {
+      "fact_type": "stage",
+      "value": "Stage IV",
+      "status": "current",
+      "effective_date": "2024-02-19",
+      "source": {
+        "file": "fhir_document_bundle.json",
+        "resource_or_section": "Condition/04856e12-57f2-591d-afb0-9bd91f034f3a.stage",
+        "evidence_text": "Stage IV"
+      },
+      "review_state": "confirm"
+    },
+    {
+      "fact_type": "metastatic_sites",
+      "value": [
+        "lung",
+        "pleura"
+      ],
+      "status": "current",
+      "effective_date": "2026-06-28",
+      "source": {
+        "file": "fhir_document_bundle.json",
+        "resource_or_section": "DiagnosticReport/401fadcc-fd08-5a02-b220-3ea66cad0a02",
+        "evidence_text": "Pulmonary nodules slightly larger with small right pleural effusion. No focal liver lesion. No osseous lesion."
+      },
+      "review_state": "confirm"
+    },
+    {
+      "fact_type": "biomarker.her2",
+      "value": "IHC 0",
+      "status": "historical",
+      "effective_date": "2018-03-15",
+      "method": "IHC",
+      "specimen": "Primary breast specimen",
+      "source": {
+        "file": "fhir_document_bundle.json",
+        "resource_or_section": "Observation/efced77a-5f1d-5d7f-9a55-261cf793b920",
+        "evidence_text": "HER2 IHC 0"
+      },
+      "review_state": "confirm"
+    },
+    {
+      "fact_type": "biomarker.her2",
+      "value": "IHC 1+; ISH not amplified",
+      "status": "current",
+      "effective_date": "2026-05-22",
+      "method": "IHC + ISH",
+      "specimen": "Left lung core biopsy",
+      "source": {
+        "file": "fhir_document_bundle.json",
+        "resource_or_section": "Observation/bd7391e4-4ff5-58f4-8290-162fa41ce252",
+        "evidence_text": "HER2 IHC 1+; ISH not amplified"
+      },
+      "review_state": "confirm"
+    },
+    {
+      "fact_type": "biomarker.er",
+      "value": "Negative (<1%)",
+      "status": "current",
+      "effective_date": "2026-05-22",
+      "method": "IHC",
+      "specimen": "Left lung core biopsy",
+      "source": {
+        "file": "fhir_document_bundle.json",
+        "resource_or_section": "Observation/f2def673-7ef6-5c9d-b927-997e8c165a2a",
+        "evidence_text": "ER Negative (<1%)"
+      },
+      "review_state": "confirm"
+    },
+    {
+      "fact_type": "biomarker.pr",
+      "value": "Negative (<1%)",
+      "status": "current",
+      "effective_date": "2026-05-22",
+      "method": "IHC",
+      "specimen": "Left lung core biopsy",
+      "source": {
+        "file": "fhir_document_bundle.json",
+        "resource_or_section": "Observation/b86f68e3-3545-5f7a-9f4b-892fee6e813e",
+        "evidence_text": "PR Negative (<1%)"
+      },
+      "review_state": "confirm"
+    },
+    {
+      "fact_type": "biomarker.pd-l1",
+      "value": "CPS 15",
+      "status": "current",
+      "effective_date": "2026-05-22",
+      "method": "IHC",
+      "specimen": "Left lung core biopsy",
+      "source": {
+        "file": "fhir_document_bundle.json",
+        "resource_or_section": "Observation/b3194531-7fed-513b-943b-f5199788d2e4",
+        "evidence_text": "PD-L1 CPS 15"
+      },
+      "review_state": "confirm"
+    },
+    {
+      "fact_type": "treatment_history",
+      "value": "Left lumpectomy",
+      "status": "completed",
+      "effective_period": {
+        "start": "2018-04-03",
+        "end": "2018-04-03"
+      },
+      "intent": "Definitive local therapy",
+      "outcome": "Completed",
+      "source": {
+        "file": "fhir_document_bundle.json",
+        "resource_or_section": "treatment_1",
+        "evidence_text": "Left lumpectomy - Completed"
+      },
+      "review_state": "confirm"
+    },
+    {
+      "fact_type": "treatment_history",
+      "value": "Doxorubicin/cyclophosphamide followed by paclitaxel",
+      "status": "completed",
+      "effective_period": {
+        "start": "2018-05-01",
+        "end": "2018-10-18"
+      },
+      "intent": "Adjuvant",
+      "outcome": "Completed",
+      "source": {
+        "file": "fhir_document_bundle.json",
+        "resource_or_section": "treatment_2",
+        "evidence_text": "Doxorubicin/cyclophosphamide followed by paclitaxel - Completed"
+      },
+      "review_state": "confirm"
+    },
+    {
+      "fact_type": "treatment_history",
+      "value": "Carboplatin plus gemcitabine",
+      "status": "completed",
+      "effective_period": {
+        "start": "2024-03-04",
+        "end": "2024-08-19"
+      },
+      "intent": "First-line metastatic",
+      "outcome": "Six cycles; partial response",
+      "source": {
+        "file": "fhir_document_bundle.json",
+        "resource_or_section": "treatment_3",
+        "evidence_text": "Carboplatin plus gemcitabine - Six cycles; partial response"
+      },
+      "review_state": "confirm"
+    },
+    {
+      "fact_type": "treatment_history",
+      "value": "Capecitabine",
+      "status": "stopped",
+      "effective_period": {
+        "start": "2025-01-06",
+        "end": "2026-05-12"
+      },
+      "intent": "Subsequent metastatic",
+      "outcome": "Stopped after radiographic progression",
+      "source": {
+        "file": "fhir_document_bundle.json",
+        "resource_or_section": "treatment_4",
+        "evidence_text": "Capecitabine - Stopped after radiographic progression"
+      },
+      "review_state": "confirm"
+    },
+    {
+      "fact_type": "performance_status_ecog",
+      "value": 1,
+      "status": "current",
+      "effective_date": "2026-07-10",
+      "source": {
+        "file": "fhir_document_bundle.json",
+        "resource_or_section": "Observation/f914cebb-c833-5918-981a-8d56fd0e7254",
+        "evidence_text": "ECOG 1"
+      },
+      "review_state": "confirm"
+    }
+  ],
+  "missing_or_review_required": [
+    "Recent brain imaging status",
+    "Trial-specific washout timing"
+  ],
+  "expected_system_behavior": "Preserve historical and current HER2 results, stop copied-forward capecitabine, honor negation, and exclude non-breast studies despite PD-L1 overlap.",
+  "must_not_infer": [
+    "trial eligibility",
+    "treatment recommendation",
+    "prognosis"
+  ]
+}

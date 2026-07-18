@@ -105,20 +105,28 @@ class DeterministicReranker:
             matched_therapies=c.matched_therapies, breakdown=breakdown,
             eligibility_sex=rec.sex if rec.sex not in {"NA", ""} else "Not specified",
             eligibility_age=", ".join(sorted(rec.age_buckets)) if rec.age_buckets else "Not specified",
+            disease_family=c.disease_family, study_purpose=c.study_purpose,
             explained_by=self.name,
         )
 
     def _reasons(self, c: Candidate, profile: PatientProfile) -> list[str]:
         out = []
-        if c.matched_conditions:
-            out.append("Disease match: " + ", ".join(c.matched_conditions[:3]))
+        # Cite disease, purpose and status evidence first (the gate signals).
+        if c.disease_family:
+            out.append("Primary disease match: " + c.disease_family)
+        elif c.record.is_basket:
+            out.append("Tumour-agnostic / basket study")
+        if c.study_purpose and c.study_purpose not in {"unknown", "treatment"}:
+            out.append("Study purpose: " + c.study_purpose.replace("_", " "))
+        elif c.study_purpose == "treatment":
+            out.append("Treatment study")
         if c.matched_biomarkers:
             out.append("Biomarker target overlap: " + ", ".join(c.matched_biomarkers[:3]))
         if c.matched_therapies:
             out.append("Relevant therapy class: " + ", ".join(c.matched_therapies[:3]))
         if c.record.is_recruiting:
-            out.append("Currently recruiting")
-        return out[:4]
+            out.append("Currently recruiting — " + c.record.status.replace("_", " ").title())
+        return out[:5]
 
     def _cautions(self, c: Candidate, profile: PatientProfile) -> list[str]:
         out = []

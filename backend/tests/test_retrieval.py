@@ -42,13 +42,25 @@ def test_her2_patient_surfaces_expected_trials(index):
     if not (FIXTURES / "phi_chart_her2.txt").exists():
         pytest.skip("fixture missing")
     profile = _profile("phi_chart_her2.txt")
-    # HER2+ patient: relax filters to allow the imaging/diagnostic comparators the
-    # worked example includes; recall is what matters at this stage.
-    cands = retrieve(profile, index, filters=RetrievalFilters(active_only=False,
-                     interventional_only=False), top_k=60)
+    # The worked example's primary comparator (NCT05253911) is a real-world OBSERVATIONAL
+    # study. Recall check runs with the treatment gate OFF so the disease-family gate and
+    # BM25 retrieval are exercised without the purpose gate hiding the comparator.
+    cands = retrieve(profile, index, filters=RetrievalFilters(
+        active_only=False, interventional_only=False, treatment_only=False), top_k=60)
     ncts = {c.record.nct for c in cands}
-    # Expected top trial from the worked example must be retrieved.
     assert "NCT05253911" in ncts, "primary HER2 trial NCT05253911 not retrieved"
+
+
+def test_treatment_gate_excludes_observational(index):
+    """Feedback P0: a treatment query must NOT return registry/observational studies.
+    NCT05253911 is OBSERVATIONAL, so the default treatment gate must drop it."""
+    if not (FIXTURES / "phi_chart_her2.txt").exists():
+        pytest.skip("fixture missing")
+    profile = _profile("phi_chart_her2.txt")
+    cands = retrieve(profile, index, filters=RetrievalFilters(
+        active_only=False, interventional_only=False, treatment_only=True), top_k=60)
+    ncts = {c.record.nct for c in cands}
+    assert "NCT05253911" not in ncts, "observational study leaked into a treatment query"
 
 
 def test_tnbc_patient_surfaces_expected_trials(index):

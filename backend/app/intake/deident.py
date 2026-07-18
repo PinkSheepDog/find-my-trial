@@ -49,6 +49,7 @@ TAG_EMAIL = "[EMAIL]"
 TAG_ADDRESS = "[ADDRESS]"
 TAG_ID = "[ID]"
 TAG_AGE = "[AGE>89]"
+TAG_URL = "[URL]"
 
 
 # Clinical/structural tokens that can look like names (capitalized) but never are.
@@ -189,6 +190,7 @@ class Deidentifier:
         out = text
 
         # --- Order matters: most specific / format-bearing first ---
+        out = sub(_RE_URL, TAG_URL, out)             # http(s):// and www. links
         out = sub(_RE_EMAIL, TAG_EMAIL, out)
         out = sub(_RE_SSN, TAG_SSN, out)
         out = sub(_RE_PHONE, TAG_PHONE, out)
@@ -198,7 +200,10 @@ class Deidentifier:
         out = sub(_RE_DOB_LABELED, TAG_DATE, out)
         out = sub(_RE_DATE_NUMERIC, TAG_DATE, out)
         out = sub(_RE_DATE_MONTH_YEAR, TAG_DATE, out)
+        out = sub(_RE_DATE_TEXT, TAG_DATE, out)      # "May 12, 2026", "12 May 2026"
         out = sub(_RE_LONG_NUMERIC_ID, TAG_ID, out)  # bare long digit runs (barcodes/record #s)
+        out = sub(_RE_STREET, TAG_ADDRESS, out)      # "123 Main St"
+        out = sub(_RE_ZIP, TAG_ADDRESS, out)         # ZIP / ZIP+4
         out = sub(_RE_ADDRESS_CITY_STATE, TAG_ADDRESS, out)
         out = sub(_RE_LABELED_NAME, TAG_NAME, out)
         out = sub(_RE_TITLED_NAME, TAG_NAME, out)
@@ -318,6 +323,33 @@ _RE_DATE_NUMERIC = re.compile(
 # Month-year: "March 2014", "Aug 2019" (dates more specific than a year are PHI).
 _RE_DATE_MONTH_YEAR = re.compile(
     rf"\b(?:{_MONTHS})\.?\s+\d{{4}}\b", re.IGNORECASE
+)
+
+# Text dates WITH a year: "May 12, 2026", "12 May 2026", "May 12th 2026". A year is
+# required so prose like "may 5 mg" is not mistaken for a date.
+_RE_DATE_TEXT = re.compile(
+    rf"\b(?:{_MONTHS})\.?\s+\d{{1,2}}(?:st|nd|rd|th)?,?\s+\d{{4}}\b"
+    rf"|\b\d{{1,2}}(?:st|nd|rd|th)?\s+(?:{_MONTHS})\.?,?\s+\d{{4}}\b",
+    re.IGNORECASE,
+)
+
+# URLs (http/https and bare www.). Not the same as the OpenRouter egress point —
+# these are identifiers copied into charts (portals, facility sites).
+_RE_URL = re.compile(r"\bhttps?://[^\s<>\")]+|\bwww\.[A-Za-z0-9.\-]+\.[A-Za-z]{2,}(?:/[^\s<>\")]*)?")
+
+# Street address: number + street name + a street-type suffix.
+_RE_STREET = re.compile(
+    r"\b\d{1,6}\s+(?:[A-Z][A-Za-z0-9.'\-]*\s+){0,4}"
+    r"(?:Street|St|Avenue|Ave|Road|Rd|Boulevard|Blvd|Drive|Dr|Lane|Ln|Court|Ct|"
+    r"Way|Place|Pl|Terrace|Ter|Circle|Cir|Highway|Hwy|Parkway|Pkwy|Suite|Ste|Apt)\b\.?",
+    re.IGNORECASE,
+)
+
+# ZIP: unambiguous ZIP+4 anywhere; a bare 5-digit only right after a US state.
+_RE_ZIP = re.compile(
+    rf"\b\d{{5}}-\d{{4}}\b"
+    rf"|(?<=\b(?:{_STATE_ABBR})\s)\d{{5}}\b"
+    rf"|(?i:zip|postal)\s*(?:code)?\s*[:#]?\s*\d{{5}}\b"
 )
 
 # Bare long digit runs (>=9 digits): barcodes, document control numbers, record IDs.

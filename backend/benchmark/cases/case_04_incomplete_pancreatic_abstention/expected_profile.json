@@ -1,0 +1,151 @@
+{
+  "schema_version": "find-my-trial-synthetic-profile-2.0",
+  "synthetic_test_data": true,
+  "not_for_clinical_use": true,
+  "case_id": "case_04_incomplete_pancreatic_abstention",
+  "patient_local_id": "SYNTH-PANC-INCOMPLETE-004",
+  "facts": [
+    {
+      "fact_type": "primary_disease",
+      "value": "Pancreatic ductal adenocarcinoma with suspected liver metastases",
+      "status": "current",
+      "effective_date": "2026-05-18",
+      "source": {
+        "file": "fhir_document_bundle.json",
+        "resource_or_section": "Condition/42b51937-7700-53c7-bff8-b3a2774343c5",
+        "evidence_text": "Pancreatic ductal adenocarcinoma with suspected liver metastases"
+      },
+      "review_state": "confirm"
+    },
+    {
+      "fact_type": "disease_family",
+      "value": "pancreatic cancer",
+      "status": "current",
+      "effective_date": "2026-05-18",
+      "source": {
+        "file": "fhir_document_bundle.json",
+        "resource_or_section": "Condition/42b51937-7700-53c7-bff8-b3a2774343c5.note",
+        "evidence_text": "Disease family: pancreatic cancer"
+      },
+      "review_state": "confirm"
+    },
+    {
+      "fact_type": "stage",
+      "value": "Not explicitly documented; metastatic disease suspected",
+      "status": "uncertain",
+      "effective_date": "2026-05-18",
+      "source": {
+        "file": "fhir_document_bundle.json",
+        "resource_or_section": "Condition/42b51937-7700-53c7-bff8-b3a2774343c5.stage",
+        "evidence_text": "Not explicitly documented; metastatic disease suspected"
+      },
+      "review_state": "needs-review"
+    },
+    {
+      "fact_type": "metastatic_sites",
+      "value": [
+        "liver - suspected, not biopsy confirmed"
+      ],
+      "status": "current",
+      "effective_date": "2026-05-18",
+      "source": {
+        "file": "fhir_document_bundle.json",
+        "resource_or_section": "DiagnosticReport/83f25b7c-5435-5af4-ae95-8bbd198f9ffa",
+        "evidence_text": "Pancreatic head mass and multiple low-attenuation liver lesions described as suspicious for metastases."
+      },
+      "review_state": "confirm"
+    },
+    {
+      "fact_type": "biomarker.kras",
+      "value": "Pending",
+      "status": "pending",
+      "effective_date": "2026-06-02",
+      "method": "NGS ordered",
+      "specimen": "Pancreatic biopsy",
+      "source": {
+        "file": "fhir_document_bundle.json",
+        "resource_or_section": "Observation/5209ca0f-a9de-556c-8f4f-758afa9c8b17",
+        "evidence_text": "KRAS Pending"
+      },
+      "review_state": "needs-review"
+    },
+    {
+      "fact_type": "biomarker.msi_mmr",
+      "value": "Not documented",
+      "status": "missing",
+      "effective_date": null,
+      "method": null,
+      "specimen": null,
+      "source": {
+        "file": "fhir_document_bundle.json",
+        "resource_or_section": "Observation/23d9030d-303d-50d0-8735-91d145f5ab7f",
+        "evidence_text": "MSI/MMR Not documented"
+      },
+      "review_state": "needs-review"
+    },
+    {
+      "fact_type": "biomarker.germline_testing",
+      "value": "Not documented",
+      "status": "missing",
+      "effective_date": null,
+      "method": null,
+      "specimen": null,
+      "source": {
+        "file": "fhir_document_bundle.json",
+        "resource_or_section": "Observation/57607cf1-e596-5803-adc8-23b4473d629c",
+        "evidence_text": "Germline testing Not documented"
+      },
+      "review_state": "needs-review"
+    },
+    {
+      "fact_type": "treatment_history",
+      "value": "Biliary stent placement",
+      "status": "completed",
+      "effective_period": {
+        "start": "2026-05-21",
+        "end": "2026-05-21"
+      },
+      "intent": "Procedure",
+      "outcome": "Completed",
+      "source": {
+        "file": "fhir_document_bundle.json",
+        "resource_or_section": "treatment_1",
+        "evidence_text": "Biliary stent placement - Completed"
+      },
+      "review_state": "confirm"
+    },
+    {
+      "fact_type": "treatment_history",
+      "value": "Systemic therapy",
+      "status": "not documented",
+      "effective_period": {
+        "start": null,
+        "end": null
+      },
+      "intent": "Unknown",
+      "outcome": "No verified administration record in this export",
+      "source": {
+        "file": "fhir_document_bundle.json",
+        "resource_or_section": "treatment_2",
+        "evidence_text": "Systemic therapy - No verified administration record in this export"
+      },
+      "review_state": "needs-review"
+    }
+  ],
+  "missing_or_review_required": [
+    "Confirmed metastatic stage",
+    "ECOG/KPS",
+    "Current CBC/CMP after biliary stent",
+    "Verified treatment history",
+    "KRAS result",
+    "MSI/MMR",
+    "Germline testing",
+    "Travel preference"
+  ],
+  "expected_system_behavior": "Return needs-review/insufficient-data status and avoid confident trial ranking until core disease, fitness, laboratory, treatment, and biomarker facts are verified.",
+  "must_not_infer": [
+    "trial eligibility",
+    "treatment recommendation",
+    "prognosis"
+  ]
+}

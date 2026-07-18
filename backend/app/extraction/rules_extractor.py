@@ -83,7 +83,7 @@ _CANCER_TYPES = {
     "Colorectal Cancer": r"\bcolorectal\b|\bcolon cancer\b|\brectal cancer\b",
     "Ovarian Cancer": r"\bovarian cancer\b",
     "Prostate Cancer": r"\bprostate cancer\b",
-    "Pancreatic Cancer": r"\bpancreatic cancer\b",
+    "Pancreatic Cancer": r"\bpancreatic cancer\b|\bpancreatic (?:ductal )?adenocarcinoma\b|\bpancreatic head mass\b|\bpdac\b",
     "Melanoma": r"\bmelanoma\b",
     "Lymphoma": r"\blymphoma\b",
     "Leukemia": r"\bleukemia\b",
@@ -96,6 +96,13 @@ _SITE_PATTERNS = {
     "Lung": r"\b(?:lung nodul|pulmonary|pleural)\b",
     "Brain": r"\bbrain\b|\bcerebral\b",
 }
+
+# Negation cues that, when they precede a site mention in the same clause, mean the
+# site is NOT a metastatic site ("NO focal liver lesion", "no osseous lesion").
+_SITE_NEG_CUES = (
+    "no ", "no focal", "no evidence", "without", "negative for", "not ", "denies",
+    "absence of", "ruled out", "resolution of", "free of",
+)
 
 _COMORBIDITIES = {
     "Hypertension": r"\bhypertension\b|\bhtn\b",
@@ -119,7 +126,7 @@ class RulesExtractor:
         sex = self._sex(text)
         cancer_types = self._match_catalog(lower, _CANCER_TYPES)
         stage, metastatic = self._stage(lower)
-        sites = self._match_catalog(lower, _SITE_PATTERNS)
+        sites = self._sites(lower)
         biomarkers = self._biomarkers(text, lower, evidence, uncertain)
         therapies = self._therapies(text, lower)
         ecog = self._ecog(lower)
@@ -257,6 +264,23 @@ class RulesExtractor:
 
     def _match_catalog(self, lower, catalog) -> list[str]:
         return [label for label, pat in catalog.items() if re.search(pat, lower)]
+
+    def _sites(self, lower) -> list[str]:
+        """Negation-aware metastatic-site extraction: a site counts only when at least
+        one mention is NOT negated in its clause ('no focal liver lesion' -> not liver)."""
+        out: list[str] = []
+        for label, pat in _SITE_PATTERNS.items():
+            for m in re.finditer(pat, lower):
+                left = lower[max(0, m.start() - 26):m.start()]
+                for sep in (". ", "; ", "\n", ", "):  # clamp to the current clause
+                    idx = left.rfind(sep)
+                    if idx != -1:
+                        left = left[idx + len(sep):]
+                if any(cue in left for cue in _SITE_NEG_CUES):
+                    continue  # this mention is negated
+                out.append(label)
+                break  # one real mention is enough
+        return out
 
     def _age(self, text) -> int | None:
         m = re.search(r"\b(\d{1,3})\s*(?:year[s]?[\s\-]old|y/?o|yo|yrs?[\s\-]old)\b", text, re.I)

@@ -42,6 +42,10 @@ class TrialResult(BaseModel):
     eligibility_sex: str = "Not specified"
     eligibility_age: str = "Not specified"
 
+    # Clinical gate evidence (why this trial cleared disease + purpose gating).
+    disease_family: str = ""          # patient∩trial cancer family
+    study_purpose: str = "unknown"    # treatment | diagnostic | screening | observational | ...
+
     explained_by: str = "rules"       # "llm" | "rules"
 
 
@@ -52,3 +56,7 @@ class MatchResponse(BaseModel):
     semantic_used: bool
     degraded_mode: bool               # True when no LLM key (rules-only explanations)
     fallback_hint: str | None = None
+    # Abstention: when core facts are missing the system returns NEEDS-REVIEW rather
+    # than a confident ranked list (decision support must not over-claim on thin input).
+    needs_review: bool = False
+    review_reasons: list[str] = Field(default_factory=list)
