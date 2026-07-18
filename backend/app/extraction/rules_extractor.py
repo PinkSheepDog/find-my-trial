@@ -16,6 +16,7 @@ import re
 from app.extraction.schema import (
     Biomarker,
     BiomarkerStatus,
+    BiomarkerTiming,
     Certainty,
     Evidence,
     PatientProfile,
@@ -154,33 +155,77 @@ class RulesExtractor:
 
     # ----------------------------- biomarkers (the core) -----------------------------
     def _biomarkers(self, text, lower, evidence, uncertain) -> list[Biomarker]:
-        found: dict[str, Biomarker] = {}
+        # Keyed by (name, timing) so a HISTORICAL and a CURRENT reading of the same
+        # marker are BOTH kept (a prior HER2 must not overwrite the current one).
+        found: dict[tuple[str, str], Biomarker] = {}
         for name, pat in _BIOMARKERS.items():
             for m in re.finditer(pat, lower):
-                window = self._window(lower, m.start(), m.end(), radius=40)
+                window = self._window(lower, m.start(), m.end(), radius=40)      # direction (clause-clamped)
+                meta = self._meta_window(lower, m.start())                        # timing/specimen (parenthetical)
                 status, detail = self._classify_status(name, window)
-                snippet = self._window(text, m.start(), m.end(), radius=35).strip()
-                existing = found.get(name)
-                # Prefer a more decisive (non-unknown) classification if we see the
-                # marker multiple times; flag genuine conflicts as uncertain.
+                timing, specimen, method = self._biomarker_context(meta, status)
+                # Only HISTORICAL splits into its own record; everything else shares the
+                # 'current' bucket so conservative conflict resolution still applies (a
+                # messy chart's contradictory mentions must never resolve to positive).
+                bucket = "historical" if timing == BiomarkerTiming.HISTORICAL else "current"
+                snippet = self._window(text, m.start(), m.end(), radius=45).strip()
+                key = (name, bucket)
+                existing = found.get(key)
                 if existing is None:
-                    found[name] = Biomarker(name=name, status=status, detail=detail)
+                    found[key] = Biomarker(name=name, status=status, detail=detail,
+                                           timing=timing, specimen=specimen, method=method)
                     evidence.append(Evidence(field=f"biomarker:{name}", snippet=snippet))
                 elif existing.status != status and BiomarkerStatus.UNKNOWN not in {existing.status, status}:
                     uncertain.append(f"biomarker:{name} (conflicting mentions)")
-                    found[name].certainty = Certainty.UNCERTAIN
+                    found[key].certainty = Certainty.UNCERTAIN
+                    found[key].specimen = found[key].specimen or specimen
                 elif existing.status == BiomarkerStatus.UNKNOWN and status != BiomarkerStatus.UNKNOWN:
-                    found[name] = Biomarker(name=name, status=status, detail=detail)
+                    found[key] = Biomarker(name=name, status=status, detail=detail,
+                                           timing=timing, specimen=specimen, method=method)
+                else:  # backfill metadata from a later, richer mention
+                    found[key].specimen = found[key].specimen or specimen
+                    found[key].method = found[key].method or method
 
-        # TNBC implies ER-/PR-/HER2- if not otherwise stated (inferred).
+        # TNBC implies ER-/PR-/HER2- if not otherwise stated (inferred, current).
         if any("Triple-Negative" in c for c in self._match_catalog(lower, _CANCER_TYPES)):
+            present = {name for name, _ in found}
             for marker in ("ER", "PR", "HER2"):
-                if marker not in found:
-                    found[marker] = Biomarker(
+                if marker not in present:
+                    found[(marker, "current")] = Biomarker(
                         name=marker, status=BiomarkerStatus.NEGATIVE,
                         detail="inferred from TNBC", certainty=Certainty.INFERRED,
                     )
         return list(found.values())
+
+    @staticmethod
+    def _meta_window(lower, start) -> str:
+        """From a marker to the end of its parenthetical / line — so 'Status: historical;
+        specimen: ...' inside '(...)' is readable even though it sits after a ';'."""
+        end = len(lower)
+        for stop in ("); ", "\n"):
+            idx = lower.find(stop, start)
+            if idx != -1:
+                end = min(end, idx + 1)
+        return lower[start:min(end, start + 160)]
+
+    @staticmethod
+    def _biomarker_context(meta, status) -> tuple[BiomarkerTiming, str | None, str | None]:
+        if ("historical" in meta or "primary breast specimen" in meta
+                or "primary specimen" in meta or "prior specimen" in meta):
+            timing = BiomarkerTiming.HISTORICAL
+        elif "pending" in meta and status in {BiomarkerStatus.EQUIVOCAL, BiomarkerStatus.UNKNOWN}:
+            timing = BiomarkerTiming.PENDING
+        else:
+            timing = BiomarkerTiming.CURRENT
+        specimen = None
+        ms = re.search(r"specimen[:\s]+([^;)\.]{2,45})", meta)
+        if ms:
+            specimen = ms.group(1).strip().title()
+        method = None
+        mm = re.search(r"method[:\s]+([a-z0-9 +/\-]{2,20})", meta) or re.search(r"\b(ihc|ish|fish|ngs|pcr)\b", meta)
+        if mm:
+            method = mm.group(1).strip().upper()
+        return timing, specimen, method
 
     def _classify_status(self, name, window) -> tuple[BiomarkerStatus, str | None]:
         """Classify a biomarker mention by inspecting its local context window.

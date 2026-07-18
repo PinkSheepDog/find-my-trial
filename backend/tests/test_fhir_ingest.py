@@ -45,6 +45,22 @@ def test_fhir_bundle_ingestion(case, family, marker, status):
         assert b is not None and b.status == status, f"{case}: {marker} = {b.status if b else None}"
 
 
+def test_fhir_keeps_historical_and_current_biomarker():
+    """Case 02: a prior HER2 result must NOT overwrite the current one — both are kept
+    with distinct timing, and gating uses the CURRENT reading."""
+    bundle = CASES / "case_02_messy_tnbc_her2_low" / "fhir_document_bundle.json"
+    if not bundle.exists():
+        pytest.skip("bundle fixture missing")
+    _, profile = _profile_from(bundle, "fhir_document_bundle.json")
+    her2 = [b for b in profile.biomarkers if b.name == "HER2"]
+    timings = {b.timing.value for b in her2}
+    assert "historical" in timings and "current" in timings, f"HER2 timings: {timings}"
+    # The CURRENT reading drives matching, and it is not positive (HER2-low).
+    assert profile.biomarker("HER2").is_current
+    assert profile.biomarker("HER2").status != BiomarkerStatus.POSITIVE
+    assert not profile.positive_biomarkers()  # historical/low must not count as a current positive
+
+
 def test_nsclc_not_classified_as_small_cell():
     # Substring collision guard: "small cell lung" inside "non-small cell lung".
     fams = disease_families_of("Metastatic non-small cell lung adenocarcinoma")

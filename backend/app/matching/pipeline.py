@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from app.config import Settings
 from app.extraction.llm_extractor import LLMExtractor
-from app.extraction.schema import BiomarkerStatus, PatientProfile
+from app.extraction.schema import BiomarkerStatus, PatientProfile, derive_facts
 from app.extraction.rules_extractor import RulesExtractor
 from app.matching.rerank import DeterministicReranker, LLMReranker
 from app.matching.results import MatchResponse
@@ -31,8 +31,11 @@ class MatchingPipeline:
 
     async def extract_profile(self, deidentified_text: str) -> PatientProfile:
         if self._llm_enabled:
-            return await self._llm_extractor.extract(deidentified_text)
-        return self._rules_extractor.extract(deidentified_text)
+            profile = await self._llm_extractor.extract(deidentified_text)
+        else:
+            profile = self._rules_extractor.extract(deidentified_text)
+        profile.facts = derive_facts(profile)   # reviewable, source-linked fact list
+        return profile
 
     async def match(
         self,

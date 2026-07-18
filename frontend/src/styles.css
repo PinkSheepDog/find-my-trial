@@ -116,6 +116,8 @@ button.ghost { background: #fff; border: 1px solid var(--line); padding: 10px 16
 .chip em { font-style: normal; font-weight: 700; }
 .chip-detail { color: var(--muted); }
 .chip.soft { background: #f1f4f9; color: var(--muted); }
+.chip.past { opacity: 0.72; }
+.chip-time { font-size: 10px; text-transform: uppercase; letter-spacing: 0.4px; background: rgba(0,0,0,0.08); border-radius: 4px; padding: 0 4px; margin-left: 2px; }
 .chip.tox { background: var(--amber-bg); color: var(--amber); }
 .bio-pos { background: var(--green-bg); color: var(--green); }
 .bio-neg { background: var(--red-bg); color: var(--red); }
@@ -123,6 +125,22 @@ button.ghost { background: #fff; border: 1px solid var(--line); padding: 10px 16
 .bio-eq { background: #eef0f5; color: var(--muted); }
 .bio-unk { background: var(--low-bg); color: var(--muted); }
 .uncertain { margin-top: 12px; font-size: 13px; color: var(--amber); background: var(--amber-bg); padding: 8px 12px; border-radius: 9px; }
+
+/* ---------------- reviewable facts ---------------- */
+.fact-review { margin-bottom: 18px; }
+.fact-review h3 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin: 0 0 8px; }
+.fact-groups { display: flex; flex-direction: column; gap: 8px; }
+.fact-group { border-left: 3px solid var(--line); padding: 6px 0 6px 10px; }
+.fact-state { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; }
+.fact-items { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.fact-item { font-size: 12.5px; background: #f4f6fb; border-radius: 6px; padding: 3px 9px; cursor: help; overflow-wrap: anywhere; }
+.fact-item b { font-weight: 600; }
+.rv-confirmed { border-color: var(--green); } .rv-confirmed .fact-state { color: var(--green); }
+.rv-inferred { border-color: var(--brand); } .rv-inferred .fact-state { color: var(--brand); }
+.rv-conflicting { border-color: var(--red); } .rv-conflicting .fact-state { color: var(--red); }
+.rv-historical { border-color: var(--muted); } .rv-historical .fact-state { color: var(--muted); }
+.rv-negated { border-color: #8a5a1f; } .rv-negated .fact-state { color: #8a5a1f; }
+.rv-missing { border-color: var(--amber); } .rv-missing .fact-state { color: var(--amber); }
 
 /* ---------------- trial board ---------------- */
 .cards { display: flex; flex-direction: column; gap: 14px; }

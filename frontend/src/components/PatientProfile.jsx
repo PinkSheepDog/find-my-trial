@@ -12,9 +12,13 @@ const STATUS_CLASS = {
 // visually distinct from positive — the UI makes the old "negative-read-as-positive"
 // failure impossible to overlook.
 function Biomarker({ b }) {
+  const tip = [b.detail, b.specimen && `specimen: ${b.specimen}`, b.method && `method: ${b.method}`]
+    .filter(Boolean).join(" · ");
+  const timeTag = b.timing && b.timing !== "current" ? b.timing : "";
   return (
-    <span className={`chip ${STATUS_CLASS[b.status] || "bio-unk"}`} title={b.detail || ""}>
+    <span className={`chip ${STATUS_CLASS[b.status] || "bio-unk"} ${timeTag ? "past" : ""}`} title={tip}>
       {b.name} <em>{b.status}</em>
+      {timeTag ? <span className="chip-time">{timeTag}</span> : null}
       {b.detail ? <span className="chip-detail"> · {b.detail}</span> : null}
     </span>
   );
@@ -30,6 +34,8 @@ export default function PatientProfile({ profile }) {
       </div>
 
       <div className="profile-summary">{p.summary_line || summarize(p)}</div>
+
+      <FactReview facts={p.facts} />
 
       <div className="profile-grid">
         <Field label="Age / Sex" value={[p.age && `${p.age}`, p.sex].filter(Boolean).join(" · ") || "—"} />
@@ -75,6 +81,43 @@ export default function PatientProfile({ profile }) {
         </div>
       )}
     </section>
+  );
+}
+
+const REVIEW_META = {
+  conflicting: "Conflicting",
+  missing: "Missing / review",
+  negated: "Negated",
+  historical: "Historical",
+  inferred: "Inferred",
+  confirmed: "Confirmed",
+};
+const REVIEW_ORDER = ["conflicting", "missing", "negated", "historical", "inferred", "confirmed"];
+
+// Expose fact states BEFORE matching (feedback P1): Confirmed / Inferred / Conflicting /
+// Historical / Negated / Missing, each fact linked to its de-identified evidence snippet.
+function FactReview({ facts }) {
+  if (!facts?.length) return null;
+  const groups = {};
+  facts.forEach((f) => { (groups[f.review_state] ||= []).push(f); });
+  return (
+    <div className="fact-review">
+      <h3>Facts for review</h3>
+      <div className="fact-groups">
+        {REVIEW_ORDER.filter((s) => groups[s]).map((s) => (
+          <div key={s} className={`fact-group rv-${s}`}>
+            <span className="fact-state">{REVIEW_META[s]} · {groups[s].length}</span>
+            <div className="fact-items">
+              {groups[s].map((f, i) => (
+                <span key={i} className="fact-item" title={f.evidence ? `evidence: ${f.evidence}` : "no source snippet"}>
+                  <b>{f.fact_type.replace(/^biomarker\./, "").replace(/_/g, " ")}:</b> {f.value}
+                </span>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
