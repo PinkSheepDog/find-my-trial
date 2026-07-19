@@ -45,6 +45,21 @@ _NEG_CUES = (
     "wild-type", "absent", "no evidence", "not detected", "not mutated", "stable",
     "intact", "proficient", "mss",  # MSI-stable / MS-stable
 )
+# Negation *patterns* for constructions a contiguous substring cue can never express,
+# because a noun phrase sits between the negator and the verb: "ALK no rearrangement
+# detected", "BRCA1 no pathogenic variant found", "ROS1 no fusion identified".
+# Standard molecular-pathology phrasing — a literal cue list silently reads these as
+# POSITIVE off the trailing "detected", which is the negative-read-as-positive bug.
+_NEG_PATTERNS = (
+    r"\bno\s+(?:\w+[\s\-]+){0,4}?(?:detected|identified|found|seen|observed|noted|reported)\b",
+    r"\bno\s+(?:evidence|sign|signs|suggestion)\s+of\b",
+    r"\bno\s+(?:\w+[\s\-]+){0,3}?(?:variants?|mutations?|rearrangements?|fusions?|"
+    r"alterations?|amplifications?|translocations?|deletions?|insertions?|expression)\b",
+    r"\bwithout\s+(?:evidence\s+of\s+)?(?:\w+[\s\-]+){0,3}?"
+    r"(?:variants?|mutations?|rearrangements?|fusions?|alterations?|amplifications?|expression)\b",
+    r"\bnegative\s+for\b",
+    r"\bnot\s+(?:detected|identified|found|seen|observed|present|amplified|mutated|expressed|rearranged)\b",
+)
 # Low cues -> LOW (clinically distinct from positive!)
 _LOW_CUES = ("low", "ihc 1+", "ihc 0", "1+", "equivocal low", "borderline low")
 # Positive cues -> POSITIVE
@@ -79,7 +94,10 @@ _CANCER_TYPES = {
     "Triple-Negative Breast Cancer": r"\btriple[\s\-]?negative\b|\btnbc\b",
     "Breast Cancer": r"\bbreast cancer\b|\binvasive ductal carcinoma\b|\bidc\b",
     "Non-Small Cell Lung Cancer": r"\bnsclc\b|\bnon[\s\-]?small cell lung\b",
-    "Small Cell Lung Cancer": r"\bsclc\b|\bsmall cell lung\b",
+    # "small cell lung" is a substring of "non-small cell lung" — a bare match pulls
+    # SCLC into every NSCLC profile, and the disease gate admits any trial sharing a
+    # family, so an SCLC trial would clear the gate for an NSCLC patient.
+    "Small Cell Lung Cancer": r"\bsclc\b|(?<![a-z])(?<!non[\s\-])small cell lung",
     "Lung Cancer": r"\blung cancer\b",
     "Colorectal Cancer": r"\bcolorectal\b|\bcolon cancer\b|\brectal cancer\b",
     "Ovarian Cancer": r"\bovarian cancer\b",
@@ -232,13 +250,16 @@ class RulesExtractor:
         Order matters: LOW and NEGATIVE cues win over POSITIVE, because a HER2-low or
         BRCA-negative finding must never be promoted to positive."""
         detail = None
+        # Phrase-level negation is resolved first: it must be able to veto the
+        # marker-specific POSITIVE branches below, not just the general cue scan.
+        negated = self._negated(window)
 
         # Special-case HER2 levels: IHC 1+ / FISH not amplified => LOW; IHC 3+ => POSITIVE.
         if name == "HER2":
             if re.search(r"ihc\s*1\+|ihc\s*0|her2[\s\-]?low|fish[^.]*not amplified|not amplified", window):
                 detail = self._grab(window, r"ihc\s*[0-3]\+|fish[^.,;]*|not amplified|her2[\s\-]?low")
                 return BiomarkerStatus.LOW, detail
-            if re.search(r"ihc\s*3\+|amplified(?!\s*not)|her2[\s\-]?positive", window):
+            if not negated and re.search(r"ihc\s*3\+|amplified(?!\s*not)|her2[\s\-]?positive", window):
                 return BiomarkerStatus.POSITIVE, self._grab(window, r"ihc\s*3\+|amplified|positive")
             if re.search(r"ihc\s*2\+", window):
                 return BiomarkerStatus.EQUIVOCAL, "IHC 2+"
@@ -247,10 +268,12 @@ class RulesExtractor:
         if name == "MSI":
             if re.search(r"\bstable\b|\bmss\b", window):
                 return BiomarkerStatus.NEGATIVE, "stable"
-            if re.search(r"\bhigh\b|\bmsi[\s\-]?h\b|instability high", window):
+            if not negated and re.search(r"\bhigh\b|\bmsi[\s\-]?h\b|instability high", window):
                 return BiomarkerStatus.POSITIVE, "high"
 
         # General cue scan — NEGATIVE and LOW take precedence over POSITIVE.
+        if negated:
+            return BiomarkerStatus.NEGATIVE, self._negation_detail(window)
         if any(cue in window for cue in _NEG_CUES):
             return BiomarkerStatus.NEGATIVE, self._grab(window, "|".join(map(re.escape, _NEG_CUES)))
         if any(cue in window for cue in _LOW_CUES):
@@ -260,6 +283,18 @@ class RulesExtractor:
         if any(cue in window for cue in _POS_CUES):
             return BiomarkerStatus.POSITIVE, self._grab(window, "|".join(map(re.escape, _POS_CUES)))
         return BiomarkerStatus.UNKNOWN, detail
+
+    @staticmethod
+    def _negated(window) -> bool:
+        return any(re.search(p, window) for p in _NEG_PATTERNS)
+
+    @staticmethod
+    def _negation_detail(window) -> str | None:
+        for p in _NEG_PATTERNS:
+            m = re.search(p, window)
+            if m:
+                return m.group(0).strip()
+        return None
 
     @staticmethod
     def _grab(window, pat) -> str | None:
