@@ -15,6 +15,43 @@ export default function Intake({ onDeidentify, filters, setFilters, busy, server
   const NEWER_FILTERS = new Set(["recruiting_only", "location_required"]);
   const supports = (field) => (serverFilters ? serverFilters.has(field) : !NEWER_FILTERS.has(field));
 
+  // Recruitment status and study type are each a single ordered choice, not
+  // independent switches: "open to enrolment" is strictly narrower than "active",
+  // and "treatment" is strictly narrower than "interventional". Presenting them as
+  // separate checkboxes let a user tick contradictory-looking pairs and left the
+  // effective filter ambiguous. One select per axis makes the narrowing explicit.
+  const statusValue = filters.recruiting_only ? "recruiting" : (filters.active_only ? "active" : "any");
+  const typeValue = filters.treatment_only ? "treatment" : (filters.interventional_only ? "interventional" : "all");
+
+  const STATUS_HELP = {
+    recruiting: `Admits ${RECRUITING_STATUSES.join(", ")}.`,
+    active: `Admits ${ACTIVE_STATUSES.join(", ")}. ACTIVE_NOT_RECRUITING studies are ongoing but closed to new enrolment.`,
+    any: "No status filter. Completed, terminated and withdrawn studies may appear.",
+  };
+  const TYPE_HELP = {
+    treatment: "Treatment and expanded-access studies only.",
+    interventional: "All interventional studies, including diagnostic, screening and prevention. Excludes observational.",
+    all: "No study-type filter. Observational studies and registries may appear.",
+  };
+
+  function onStatusChange(e) {
+    const v = e.target.value;
+    setFilters({
+      ...filters,
+      recruiting_only: v === "recruiting",
+      active_only: v === "recruiting" || v === "active",
+    });
+  }
+
+  function onTypeChange(e) {
+    const v = e.target.value;
+    setFilters({
+      ...filters,
+      treatment_only: v === "treatment",
+      interventional_only: v === "treatment" || v === "interventional",
+    });
+  }
+
   async function onFile(e) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -89,98 +126,71 @@ export default function Intake({ onDeidentify, filters, setFilters, busy, server
           </div>
         </div>
 
-        <aside className="intake-controls">
-          <h3>Search settings</h3>
-          <label htmlFor="filter-topk">
-            <span>Top results</span>
-            <input id="filter-topk" type="number" min={1} max={30} value={filters.top_k}
-              onChange={(e) => setFilters({ ...filters, top_k: Number(e.target.value) })} />
-          </label>
-          <label htmlFor="filter-location">
-            <span>Location focus</span>
-            <input id="filter-location" type="text" placeholder="Detroit, Michigan" value={filters.location}
+        <aside className="intake-controls" aria-labelledby="search-settings-heading">
+          <div className="controls-head">
+            <h3 id="search-settings-heading">Search settings</h3>
+          </div>
+
+          <div className="field">
+            <label htmlFor="filter-topk">Results to return</label>
+            <select id="filter-topk" value={filters.top_k}
+              onChange={(e) => setFilters({ ...filters, top_k: Number(e.target.value) })}>
+              {[5, 10, 15, 20, 25, 30].map((n) => <option key={n} value={n}>{n}</option>)}
+            </select>
+          </div>
+
+          <div className="field">
+            <label htmlFor="filter-location">Location focus</label>
+            <input id="filter-location" type="text" placeholder="e.g. Detroit, Michigan"
+              value={filters.location}
               aria-describedby="help-location"
               onChange={(e) => setFilters({ ...filters, location: e.target.value })} />
-          </label>
-          {supports("location_required") ? (
-            <>
-              <label className="check">
-                <input type="checkbox" checked={!!filters.location_required}
-                  disabled={!filters.location.trim()}
-                  aria-describedby="help-location"
-                  onChange={(e) => setFilters({ ...filters, location_required: e.target.checked })} />
-                <span>Require a site at this location</span>
-              </label>
-              <p className="filter-help" id="help-location">
-                Off: location boosts ranking and adds a "no sites near here" caution.
-                On: it becomes a hard filter and can legitimately return no trials.
+            {!supports("location_required") && (
+              <p className="field-help" id="help-location">
+                Location boosts ranking; it does not exclude trials.
               </p>
-            </>
-          ) : (
-            <p className="filter-help" id="help-location">
-              Location boosts ranking; it does not exclude trials.
-            </p>
+            )}
+          </div>
+
+          {supports("location_required") && (
+            <div className="field">
+              <label htmlFor="filter-location-scope">Location handling</label>
+              <select id="filter-location-scope"
+                value={filters.location_required ? "require" : "prefer"}
+                disabled={!filters.location.trim()}
+                aria-describedby="help-location"
+                onChange={(e) => setFilters({ ...filters, location_required: e.target.value === "require" })}>
+                <option value="prefer">Prefer sites at this location</option>
+                <option value="require">Require a site at this location</option>
+              </select>
+              <p className="field-help" id="help-location">
+                Preferring boosts ranking and flags trials with no nearby site. Requiring
+                excludes them, and can legitimately return no trials.
+              </p>
+            </div>
           )}
 
-          <fieldset className="filter-set">
-            <legend>Recruitment status</legend>
+          <div className="field">
+            <label htmlFor="filter-status">Recruitment status</label>
+            <select id="filter-status" value={statusValue} aria-describedby="help-status"
+              onChange={onStatusChange}>
+              {supports("recruiting_only") && <option value="recruiting">Open to enrolment only</option>}
+              <option value="active">Active studies</option>
+              <option value="any">Any recruitment status</option>
+            </select>
+            <p className="field-help" id="help-status">{STATUS_HELP[statusValue]}</p>
+          </div>
 
-            <label className="check">
-              <input type="checkbox" checked={filters.active_only}
-                aria-describedby="help-active"
-                onChange={(e) => setFilters({ ...filters, active_only: e.target.checked })} />
-              <span>Active studies only</span>
-            </label>
-            {/* "Active" is broader than "recruiting" — say exactly which registry
-                statuses are admitted rather than leaving the user to guess. */}
-            <p className="filter-help" id="help-active">
-              Includes registry status {ACTIVE_STATUSES.join(", ")}.
-              ACTIVE_NOT_RECRUITING studies are ongoing but <strong>closed to new enrolment</strong>.
-            </p>
-
-            {supports("recruiting_only") && (
-              <>
-                <label className="check">
-                  <input type="checkbox" checked={!!filters.recruiting_only}
-                    aria-describedby="help-recruiting"
-                    onChange={(e) => setFilters({ ...filters, recruiting_only: e.target.checked })} />
-                  <span>Open to enrolment only</span>
-                </label>
-                <p className="filter-help" id="help-recruiting">
-                  Narrows to {RECRUITING_STATUSES.join(", ")} — excludes ACTIVE_NOT_RECRUITING.
-                </p>
-              </>
-            )}
-          </fieldset>
-
-          <fieldset className="filter-set">
-            <legend>Study type</legend>
-
-            <label className="check">
-              <input type="checkbox" checked={filters.interventional_only}
-                aria-describedby="help-interventional"
-                onChange={(e) => setFilters({ ...filters, interventional_only: e.target.checked })} />
-              <span>Interventional only</span>
-            </label>
-            <p className="filter-help" id="help-interventional">
-              Excludes observational studies and registries.
-            </p>
-
-            {supports("treatment_only") && (
-              <>
-                <label className="check">
-                  <input type="checkbox" checked={filters.treatment_only}
-                    aria-describedby="help-treatment"
-                    onChange={(e) => setFilters({ ...filters, treatment_only: e.target.checked })} />
-                  <span>Treatment studies only</span>
-                </label>
-                <p className="filter-help" id="help-treatment">
-                  On (default): only treatment and expanded-access studies. Turn off to also see
-                  diagnostic, imaging, screening, prevention, supportive-care and registry studies.
-                </p>
-              </>
-            )}
-          </fieldset>
+          <div className="field">
+            <label htmlFor="filter-type">Study type</label>
+            <select id="filter-type" value={typeValue} aria-describedby="help-type"
+              onChange={onTypeChange}>
+              {supports("treatment_only") && <option value="treatment">Treatment studies only</option>}
+              <option value="interventional">All interventional studies</option>
+              <option value="all">All study types</option>
+            </select>
+            <p className="field-help" id="help-type">{TYPE_HELP[typeValue]}</p>
+          </div>
         </aside>
       </div>
     </section>

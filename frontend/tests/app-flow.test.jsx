@@ -312,10 +312,11 @@ describe("filters", () => {
 
   it("exposes the treatment-only control the server was silently defaulting", async () => {
     await renderApp();
-    const control = screen.getByLabelText(/treatment studies only/i);
-    expect(control).toBeChecked();
+    const control = screen.getByLabelText(/study type/i);
+    expect(control).toHaveValue("treatment");
 
-    fireEvent.click(control);
+    // Widening past treatment-only must actually reach the server as false.
+    fireEvent.change(control, { target: { value: "interventional" } });
     fireEvent.change(screen.getByLabelText(/chart text/i), { target: { value: "chart" } });
     fireEvent.click(screen.getByRole("button", { name: /de-identify/i }));
     await screen.findByRole("heading", { name: /De-identification Review/i });
@@ -323,29 +324,72 @@ describe("filters", () => {
 
     await waitFor(() => expect(api.match).toHaveBeenCalled());
     expect(api.match.mock.calls[0][0].treatment_only).toBe(false);
+    expect(api.match.mock.calls[0][0].interventional_only).toBe(true);
+  });
+
+  it("widens to every study type when asked", async () => {
+    await renderApp();
+    fireEvent.change(screen.getByLabelText(/study type/i), { target: { value: "all" } });
+    fireEvent.change(screen.getByLabelText(/chart text/i), { target: { value: "chart" } });
+    fireEvent.click(screen.getByRole("button", { name: /de-identify/i }));
+    await screen.findByRole("heading", { name: /De-identification Review/i });
+    fireEvent.click(screen.getByRole("button", { name: /approve this text/i }));
+
+    await waitFor(() => expect(api.match).toHaveBeenCalled());
+    expect(api.match.mock.calls[0][0]).toMatchObject({
+      treatment_only: false, interventional_only: false,
+    });
   });
 
   it("exposes recruiting_only when the server models it", async () => {
     await renderApp();
-    expect(screen.getByLabelText(/open to enrolment only/i)).toBeInTheDocument();
-    expect(screen.getByText(/excludes ACTIVE_NOT_RECRUITING/i)).toBeInTheDocument();
+    const status = screen.getByLabelText(/recruitment status/i);
+    expect(within(status).getByRole("option", { name: /open to enrolment only/i })).toBeInTheDocument();
+  });
+
+  // "Open to enrolment" is strictly narrower than "active", so choosing it must set
+  // BOTH flags — sending recruiting_only without active_only would be incoherent.
+  it("narrowing to open-to-enrolment sends both status flags", async () => {
+    await renderApp();
+    fireEvent.change(screen.getByLabelText(/recruitment status/i), { target: { value: "recruiting" } });
+    expect(screen.getByText(/Admits RECRUITING/i)).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText(/chart text/i), { target: { value: "chart" } });
+    fireEvent.click(screen.getByRole("button", { name: /de-identify/i }));
+    await screen.findByRole("heading", { name: /De-identification Review/i });
+    fireEvent.click(screen.getByRole("button", { name: /approve this text/i }));
+
+    await waitFor(() => expect(api.match).toHaveBeenCalled());
+    expect(api.match.mock.calls[0][0]).toMatchObject({ recruiting_only: true, active_only: true });
+  });
+
+  it("drops the status filter entirely when any status is chosen", async () => {
+    await renderApp();
+    fireEvent.change(screen.getByLabelText(/recruitment status/i), { target: { value: "any" } });
+    fireEvent.change(screen.getByLabelText(/chart text/i), { target: { value: "chart" } });
+    fireEvent.click(screen.getByRole("button", { name: /de-identify/i }));
+    await screen.findByRole("heading", { name: /De-identification Review/i });
+    fireEvent.click(screen.getByRole("button", { name: /approve this text/i }));
+
+    await waitFor(() => expect(api.match).toHaveBeenCalled());
+    expect(api.match.mock.calls[0][0]).toMatchObject({ recruiting_only: false, active_only: false });
   });
 
   it("exposes location_required and explains soft vs hard location filtering", async () => {
     await renderApp();
-    const control = await screen.findByLabelText(/require a site at this location/i);
+    const control = await screen.findByLabelText(/location handling/i);
     // Meaningless without a location, so it stays disabled until one is typed.
     expect(control).toBeDisabled();
 
     fireEvent.change(screen.getByLabelText(/location focus/i), { target: { value: "Detroit, Michigan" } });
     expect(control).toBeEnabled();
-    expect(screen.getByText(/becomes a hard filter/i)).toBeInTheDocument();
+    expect(screen.getByText(/can legitimately return no trials/i)).toBeInTheDocument();
   });
 
   it("sends the location filters the server models", async () => {
     await renderApp();
     fireEvent.change(screen.getByLabelText(/location focus/i), { target: { value: "Detroit" } });
-    fireEvent.click(await screen.findByLabelText(/require a site at this location/i));
+    fireEvent.change(await screen.findByLabelText(/location handling/i), { target: { value: "require" } });
     fireEvent.change(screen.getByLabelText(/chart text/i), { target: { value: "chart" } });
     fireEvent.click(screen.getByRole("button", { name: /de-identify/i }));
     await screen.findByRole("heading", { name: /De-identification Review/i });
@@ -361,12 +405,13 @@ describe("filters", () => {
     });
     await renderApp();
     await waitFor(() => expect(api.capabilities).toHaveBeenCalled());
-    await waitFor(() => expect(screen.queryByLabelText(/open to enrolment only/i)).toBeNull());
+    await waitFor(() =>
+      expect(screen.queryByRole("option", { name: /open to enrolment only/i })).toBeNull());
   });
 
   it("names the registry statuses the active filter admits", async () => {
     await renderApp();
-    const help = screen.getByText(/Includes registry status/i);
+    const help = screen.getByText(/Admits RECRUITING/i);
     expect(help).toHaveTextContent("ACTIVE_NOT_RECRUITING");
     expect(help).toHaveTextContent(/closed to new enrolment/i);
   });
@@ -374,8 +419,10 @@ describe("filters", () => {
   it("degrades to the long-standing filters when the probe fails", async () => {
     api.capabilities.mockRejectedValue(new Error("no openapi"));
     await renderApp();
-    expect(screen.getByLabelText(/treatment studies only/i)).toBeInTheDocument();
-    expect(screen.queryByLabelText(/open to enrolment only/i)).toBeNull();
+    expect(
+      within(screen.getByLabelText(/study type/i)).getByRole("option", { name: /treatment studies only/i }),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("option", { name: /open to enrolment only/i })).toBeNull();
   });
 });
 
