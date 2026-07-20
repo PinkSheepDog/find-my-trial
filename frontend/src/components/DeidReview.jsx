@@ -48,9 +48,7 @@ export default function DeidReview({ deid, onApprove, onEdit, busy, hasResult, a
       )}
       {state === "approved" && (
         <div className="gate-note approved" role="status">
-          <strong>Approved for matching.</strong> This exact text is authorised
-          {approval.expiresInMinutes ? ` for ${approval.expiresInMinutes} minutes` : ""}. Editing it
-          below withdraws the approval.
+          <strong>Approved for matching.</strong>
         </div>
       )}
       {state === "not-enforced" && (

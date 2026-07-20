@@ -119,18 +119,6 @@ label.check { min-height: var(--tap); }
 .nav { display: flex; flex-direction: column; gap: 2px; }
 .nav a { color: #b7c2d6; padding: 8px 10px; border-radius: 8px; font-size: 13px; }
 .nav a:hover { background: rgba(255,255,255,0.06); text-decoration: none; }
-.sidebar-stat {
-  background: rgba(255,255,255,0.05); border-radius: 10px; padding: 12px;
-  display: flex; flex-direction: column; gap: 2px;
-}
-.sidebar-stat span { font-size: 11px; color: #8a97b0; text-transform: uppercase; letter-spacing: 0.5px; }
-.sidebar-stat strong { font-size: 22px; color: #fff; }
-.sidebar-stat .corpus-line { margin-top: 8px; }
-.sidebar-stat .corpus-date { font-size: 15px; }
-.sidebar-stat .corpus-age { text-transform: none; letter-spacing: 0; font-size: 11px; }
-.sidebar-stat .corpus-unverified { color: #f0c980; }
-.sidebar-stat.stale { box-shadow: inset 0 0 0 1px var(--amber); }
-.sidebar-stat.stale .corpus-date { color: #f0c980; }
 .sidebar-note { font-size: 12px; color: #93a0b8; border-left: 2px solid #34415e; padding-left: 10px; }
 .sidebar-note.warn { color: #f0c980; border-color: var(--amber); }
 .sidebar-foot { margin-top: auto; display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 13px; color: #b7c2d6; }
@@ -185,19 +173,6 @@ label.check { min-height: var(--tap); }
   animation: spin 0.8s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
-
-/* ---------------- corpus freshness ---------------- */
-.corpus-banner {
-  display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px;
-  background: #eef3ff; border: 1px solid #cddaff; border-left: 4px solid var(--brand);
-  border-radius: 10px; padding: 10px 14px; margin-bottom: 18px; font-size: 13px;
-}
-.corpus-banner-label { color: var(--brand-dark); text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
-.corpus-banner-date { font-size: 16px; color: var(--brand-dark); }
-.corpus-banner-age, .corpus-banner-meta { color: var(--muted); }
-.corpus-banner-note { flex-basis: 100%; color: var(--amber); font-weight: 600; }
-.corpus-banner.stale { background: var(--amber-bg); border-color: #eccf95; border-left-color: var(--amber); }
-.corpus-banner.stale .corpus-banner-date, .corpus-banner.stale .corpus-banner-label { color: #7a5712; }
 
 /* ---------------- intake ---------------- */
 .intake-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 260px); gap: 20px; }

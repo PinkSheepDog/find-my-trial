@@ -263,7 +263,6 @@ describe("de-identification approval gate", () => {
     await reachReview();
     fireEvent.click(screen.getByRole("button", { name: /approve this text/i }));
     expect(await screen.findByText(/Approved for matching/i)).toBeInTheDocument();
-    expect(screen.getByText(/for 30 minutes/i)).toBeInTheDocument();
   });
 
   it("withdraws the approval badge when the text is edited afterwards", async () => {
@@ -380,30 +379,8 @@ describe("filters", () => {
   });
 });
 
-describe("corpus freshness", () => {
-  it("shows the data-current-through date above the fold", async () => {
-    await renderApp();
-    const banner = screen.getByTestId("corpus-banner");
-    expect(within(banner).getByText("2026-07-10")).toBeInTheDocument();
-    expect(banner).toHaveTextContent(/trial data current through/i);
-    expect(banner).toHaveTextContent(/4,321 trials indexed/);
-  });
-
-  it("says so plainly when corpus provenance was not verified", async () => {
-    api.health.mockResolvedValue({ ...HEALTH, corpus_integrity_verified: false });
-    await renderApp();
-    // Stated in both the rail and the banner — never smoothed into silence.
-    await waitFor(() => expect(screen.getAllByText(/provenance unverified/i).length).toBeGreaterThan(0));
-  });
-
-  it("does not imply freshness it cannot prove", async () => {
-    api.health.mockResolvedValue({ ...HEALTH, data_current_through: "" });
-    await renderApp();
-    const banner = await screen.findByTestId("corpus-banner");
-    expect(banner).toHaveTextContent(/unknown/i);
-    expect(banner).toHaveTextContent(/confirm trial status on ClinicalTrials\.gov/i);
-  });
-});
+// Corpus freshness / provenance is intentionally not shown on-screen (product
+// decision — it remains in the exported handoff summary; see handoff.test.jsx).
 
 describe("skip link", () => {
   it("provides a skip-to-content link as the first focusable element", async () => {

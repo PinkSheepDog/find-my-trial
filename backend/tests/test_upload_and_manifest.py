@@ -20,10 +20,20 @@ def test_accepts_valid_uploads():
     validate_upload("bundle.json", b'{"resourceType":"Bundle"}')
 
 
+def test_accepts_pdf_with_leading_bom_or_junk():
+    """The validator must not be stricter than the PDF reader: a %PDF marker that
+    follows a BOM or a few leading bytes is still a readable PDF (PyMuPDF opens it),
+    so it must pass validation rather than be rejected as content-mismatch."""
+    validate_upload("bom.pdf", b"\xef\xbb\xbf%PDF-1.5\n...")           # UTF-8 BOM before marker
+    validate_upload("lead.pdf", b"   \r\n%PDF-1.4 rest of file")        # leading whitespace
+    validate_upload("scan.pdf", b"\x00\x00garbage\n%PDF-1.7 scanned")   # junk within first KB
+
+
 @pytest.mark.parametrize("name,data,code", [
     ("empty.txt", b"", 400),
     ("malware.exe", b"MZ...", 415),
     ("fake.pdf", b"not a real pdf", 415),          # extension/signature mismatch
+    ("no-marker.pdf", b"x" * 4096, 415),           # no %PDF anywhere in the scan window
     ("locked.pdf", b"%PDF-1.7\n/Encrypt 1 0 R", 415),
 ])
 def test_rejects_bad_uploads(name, data, code):
