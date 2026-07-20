@@ -1,9 +1,10 @@
 {
-  "schema_version": "find-my-trial-synthetic-profile-2.0",
+  "schema_version": "find-my-trial-synthetic-profile-2.1",
   "synthetic_test_data": true,
   "not_for_clinical_use": true,
   "case_id": "case_04_incomplete_pancreatic_abstention",
   "patient_local_id": "SYNTH-PANC-INCOMPLETE-004",
+  "case_type": "incomplete",
   "facts": [
     {
       "fact_type": "primary_disease",
@@ -147,5 +148,45 @@
     "trial eligibility",
     "treatment recommendation",
     "prognosis"
-  ]
+  ],
+  "expected_extraction": {
+    "disease_families": {
+      "present": [
+        "pancreatic cancer"
+      ],
+      "absent": [
+        "hepatocellular carcinoma",
+        "breast cancer",
+        "non-small cell lung cancer"
+      ]
+    },
+    "is_metastatic": true,
+    "ecog": null,
+    "metastatic_sites": {
+      "present": [],
+      "absent": []
+    },
+    "biomarkers": [
+      {
+        "name": "KRAS",
+        "direction": "unknown",
+        "timing": "pending",
+        "evidence": "molecular panel ordered: KRAS pending",
+        "note": "An ordered-but-unresulted panel has no direction. Status is UNKNOWN and timing is PENDING; 'pending' is not a status value. Previously read as EQUIVOCAL, which asserts an ambiguous result that does not exist yet."
+      }
+    ],
+    "therapies_present": []
+  },
+  "expected_behavior": {
+    "abstains": true,
+    "expect_results": false,
+    "wrong_disease_at_10": 0,
+    "wrong_purpose_at_10": 0,
+    "no_contraindicated_rank_1": true,
+    "expected_cautions": []
+  },
+  "expected_retrieval": {
+    "selection_criteria": "None \u2014 the correct behavior is abstention, not ranking.",
+    "must_rank_top_3": []
+  }
 }

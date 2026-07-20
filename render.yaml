@@ -29,5 +29,12 @@ services:
         value: "true"
       - key: FMT_TRIALS_CSV_URL
         sync: false            # URL to the 33MB corpus (e.g. a GitHub Release asset)
+      - key: FMT_TRIALS_CSV_SHA256
+        # Expected corpus digest. The URL above is operator-configurable, so without
+        # this a swapped asset or truncated download is indexed and served silently.
+        value: 68c28b506e1d9abfd67a0e0069e59ac1f1d148a18c30e8901cd79cbe56ecde0c
+      - key: FMT_REQUIRE_DEID_REVIEW
+        # Server-side egress gate. Must stay true anywhere reachable by a real chart.
+        value: "true"
       - key: FMT_CORS_ORIGINS
         sync: false            # set to your https://<service>.onrender.com URL after first deploy

@@ -1,0 +1,31 @@
+{
+  "case_id": "case_06_no_good_match_rare_adrenocortical",
+  "patient_local_id": "SYNTH-ACC-NOMATCH-006",
+  "assertions": [
+    {
+      "id": "no-good-match-abstains",
+      "severity": "error",
+      "assertion": "With no study for this disease in the corpus, the system abstains, returns nothing, or returns only tumour-agnostic basket studies."
+    },
+    {
+      "id": "wrong-disease-zero",
+      "severity": "error",
+      "assertion": "No study for a different primary cancer enters the top 10 through chemotherapy, metastatic-site, or generic-oncology overlap."
+    },
+    {
+      "id": "no-confident-match",
+      "severity": "error",
+      "assertion": "No result is presented above low fit (match score stays under 60)."
+    },
+    {
+      "id": "purpose-gate",
+      "severity": "error",
+      "assertion": "Treatment query must not be satisfied by imaging, screening, registry, or observational studies."
+    },
+    {
+      "id": "no-eligibility-claim",
+      "severity": "error",
+      "assertion": "No output states or implies final eligibility."
+    }
+  ]
+}

@@ -8,24 +8,66 @@ const STATUS_CLASS = {
   unknown: "bio-unk",
 };
 
+const NOT_RECORDED = "not recorded";
+
 // Biomarkers are rendered WITH DIRECTION. A HER2-low or BRCA-negative marker is
 // visually distinct from positive — the UI makes the old "negative-read-as-positive"
 // failure impossible to overlook.
-function Biomarker({ b }) {
-  const tip = [b.detail, b.specimen && `specimen: ${b.specimen}`, b.method && `method: ${b.method}`]
-    .filter(Boolean).join(" · ");
+//
+// Provenance (disease, specimen, method, date) is rendered VISIBLY rather than in a
+// title tooltip: a tooltip cannot be opened on a touch device and is not reliably
+// reachable by screen readers, so it is not a place to keep information a clinician
+// needs to judge whether a result still applies. Missing values say "not recorded"
+// instead of vanishing — an undated marker of unknown provenance must look different
+// from a fully sourced one.
+function Biomarker({ b, fallbackDisease }) {
   const timeTag = b.timing && b.timing !== "current" ? b.timing : "";
+  const disease = b.disease || b.disease_family || b.condition || "";
   return (
-    <span className={`chip ${STATUS_CLASS[b.status] || "bio-unk"} ${timeTag ? "past" : ""}`} title={tip}>
-      {b.name} <em>{b.status}</em>
-      {timeTag ? <span className="chip-time">{timeTag}</span> : null}
-      {b.detail ? <span className="chip-detail"> · {b.detail}</span> : null}
-    </span>
+    <div className={`bio-card ${STATUS_CLASS[b.status] || "bio-unk"} ${timeTag ? "past" : ""}`}>
+      <div className="bio-head">
+        <span className="bio-name">{b.name}</span>
+        <em className="bio-status">{b.status}</em>
+        {timeTag ? <span className="chip-time">{timeTag}</span> : null}
+        {b.certainty && b.certainty !== "stated" ? (
+          <span className="chip-time">{b.certainty}</span>
+        ) : null}
+      </div>
+
+      {b.detail && <div className="bio-detail">{b.detail}</div>}
+
+      <dl className="bio-meta">
+        <BioMeta
+          label="Disease"
+          value={disease || fallbackDisease}
+          // A marker inherits the chart's disease context when the extractor did
+          // not associate one; say which it is so the two are never confused.
+          hint={!disease && fallbackDisease ? "from chart diagnosis" : ""}
+        />
+        <BioMeta label="Specimen" value={b.specimen} />
+        <BioMeta label="Method" value={b.method} />
+        <BioMeta label="Date" value={b.date} />
+      </dl>
+    </div>
+  );
+}
+
+function BioMeta({ label, value, hint }) {
+  const known = typeof value === "string" ? value.trim() : value;
+  return (
+    <div className="bio-meta-item">
+      <dt>{label}</dt>
+      <dd className={known ? "" : "bio-missing"}>
+        {known || NOT_RECORDED}
+        {known && hint ? <span className="bio-hint"> ({hint})</span> : null}
+      </dd>
+    </div>
   );
 }
 
 export default function PatientProfile({ profile }) {
   const p = profile;
+  const fallbackDisease = p.cancer_types?.length ? p.cancer_types.join(", ") : (p.diagnosis || "");
   return (
     <section id="profile" className="panel">
       <div className="panel-head">
@@ -48,14 +90,22 @@ export default function PatientProfile({ profile }) {
         {p.cancer_types?.length ? p.cancer_types.map((c) => <span key={c} className="chip">{c}</span>) : <Empty />}
       </Group>
 
-      <Group title="Biomarkers (with direction)">
-        {p.biomarkers?.length ? p.biomarkers.map((b) => <Biomarker key={b.name} b={b} />) : <Empty />}
-      </Group>
+      <div className="group">
+        <h3>Biomarkers (with direction, specimen, method and date)</h3>
+        <div className="bio-cards">
+          {p.biomarkers?.length
+            ? p.biomarkers.map((b) => <Biomarker key={b.name} b={b} fallbackDisease={fallbackDisease} />)
+            : <Empty />}
+        </div>
+      </div>
 
       <Group title="Therapies">
         {p.therapies?.length ? p.therapies.map((t) => (
-          <span key={t.name} className={`chip ${t.caused_toxicity ? "tox" : ""}`} title={t.caused_toxicity || ""}>
-            {t.name}{t.caused_toxicity ? " ⚠" : ""}
+          <span key={t.name} className={`chip ${t.caused_toxicity ? "tox" : ""}`}>
+            {t.name}
+            {t.caused_toxicity ? (
+              <span className="chip-detail"> · toxicity: {t.caused_toxicity}</span>
+            ) : null}
           </span>
         )) : <Empty />}
       </Group>
@@ -109,8 +159,12 @@ function FactReview({ facts }) {
             <span className="fact-state">{REVIEW_META[s]} · {groups[s].length}</span>
             <div className="fact-items">
               {groups[s].map((f, i) => (
-                <span key={i} className="fact-item" title={f.evidence ? `evidence: ${f.evidence}` : "no source snippet"}>
+                <span key={i} className="fact-item">
                   <b>{f.fact_type.replace(/^biomarker\./, "").replace(/_/g, " ")}:</b> {f.value}
+                  {/* Evidence is shown, not hidden behind a hover tooltip. */}
+                  <span className="fact-evidence">
+                    {f.evidence ? <q>{f.evidence}</q> : <span className="bio-missing">no source snippet</span>}
+                  </span>
                 </span>
               ))}
             </div>

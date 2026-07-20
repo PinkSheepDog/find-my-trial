@@ -68,7 +68,22 @@ _POS_CUES = (
     "high", "elevated", "detected", "present", "ihc 3+",
 )
 # Equivocal cues
-_EQUIV_CUES = ("equivocal", "borderline", "indeterminate", "pending", "ihc 2+")
+# "pending" is deliberately NOT here. Equivocal means an ambiguous RESULT (HER2 IHC 2+,
+# which reflexes to ISH); pending means no result exists yet. Filing an unordered result
+# as equivocal overstates what the chart knows. Pending falls through to UNKNOWN, and
+# _biomarker_context tags the timing as PENDING.
+_EQUIV_CUES = ("equivocal", "borderline", "indeterminate", "ihc 2+")
+
+# How to resolve contradictory mentions of the same marker in the same timing bucket.
+# Lower wins. Ordered least-positive first, so a conflict can only ever settle on a
+# reading that is more conservative than POSITIVE — never the other way around.
+_CONFLICT_PRECEDENCE = {
+    BiomarkerStatus.NEGATIVE: 0,
+    BiomarkerStatus.LOW: 1,
+    BiomarkerStatus.EQUIVOCAL: 2,
+    BiomarkerStatus.POSITIVE: 3,
+    BiomarkerStatus.UNKNOWN: 4,
+}
 
 _THERAPIES = {
     "Trastuzumab": r"\btrastuzumab\b|\bherceptin\b",
@@ -112,7 +127,11 @@ _CANCER_TYPES = {
 _SITE_PATTERNS = {
     "Liver": r"\b(?:liver|hepatic)\b",
     "Bone": r"\b(?:bone|osseous|spine|pelvis)\b",
-    "Lung": r"\b(?:lung nodul|pulmonary|pleural)\b",
+    # Deliberately NOT a bare "lung": that would read the primary site out of
+    # "non-small cell lung cancer" as a metastatic site. Match only lung mentions that
+    # are explicitly metastatic/lesional.
+    # \s+ not a literal space: wrapped chart text splits "liver and lung\nmetastases".
+    "Lung": r"\b(?:lung\s+nodul|lung\s+metasta|lung\s+met\b|lung\s+lesion|pulmonary|pleural)",
     "Brain": r"\bbrain\b|\bcerebral\b",
 }
 
@@ -194,7 +213,17 @@ class RulesExtractor:
                                            timing=timing, specimen=specimen, method=method)
                     evidence.append(Evidence(field=f"biomarker:{name}", snippet=snippet))
                 elif existing.status != status and BiomarkerStatus.UNKNOWN not in {existing.status, status}:
+                    # Contradictory mentions in the same bucket. Flagging alone is not
+                    # enough: keeping whichever was seen FIRST lets a stale copied-forward
+                    # "ER positive" problem-list entry outrank a current biopsy's "ER
+                    # negative", and the patient is then matched to endocrine-therapy
+                    # trials they are ineligible for. Resolve to the LEAST positive
+                    # reading and mark it uncertain so a human adjudicates.
                     uncertain.append(f"biomarker:{name} (conflicting mentions)")
+                    resolved = min(existing.status, status, key=_CONFLICT_PRECEDENCE.__getitem__)
+                    if resolved != existing.status:
+                        found[key].status = resolved
+                        found[key].detail = detail or found[key].detail
                     found[key].certainty = Certainty.UNCERTAIN
                     found[key].specimen = found[key].specimen or specimen
                 elif existing.status == BiomarkerStatus.UNKNOWN and status != BiomarkerStatus.UNKNOWN:
@@ -217,14 +246,30 @@ class RulesExtractor:
 
     @staticmethod
     def _meta_window(lower, start) -> str:
-        """From a marker to the end of its parenthetical / line — so 'Status: historical;
-        specimen: ...' inside '(...)' is readable even though it sits after a ';'."""
+        """Context for timing/specimen/method: the marker's parenthetical or line.
+
+        Includes a bounded run of text BEFORE the marker on the same line, because the
+        qualifier frequently precedes it ("historical breast specimen HER2=0") rather
+        than trailing it ("HER2 3+ (historical)"). Looking only rightward filed such a
+        mention as CURRENT and collapsed it into the current record, losing the
+        historical-vs-current distinction the chart was drawing. Clamped to the current
+        line so a qualifier cannot leak in from an unrelated one."""
         end = len(lower)
         for stop in ("); ", "\n"):
             idx = lower.find(stop, start)
             if idx != -1:
                 end = min(end, idx + 1)
-        return lower[start:min(end, start + 160)]
+        line_start = lower.rfind("\n", 0, start) + 1
+        left_from = max(line_start, start - 80)
+        left = lower[left_from:start]
+        # Clamp to the marker's own clause. Without this, "(historical). HER2 IHC 0 on the
+        # current biopsy" would read the preceding mention's qualifier and file BOTH
+        # timepoints as historical, collapsing them back into one record.
+        for sep in (". ", "; "):
+            idx = left.rfind(sep)
+            if idx != -1:
+                left = left[idx + len(sep):]
+        return left + lower[start:min(end, start + 160)]
 
     @staticmethod
     def _biomarker_context(meta, status) -> tuple[BiomarkerTiming, str | None, str | None]:
@@ -254,8 +299,39 @@ class RulesExtractor:
         # marker-specific POSITIVE branches below, not just the general cue scan.
         negated = self._negated(window)
 
+        # Hormone receptors are reported as a percentage of stained nuclei. Per ASCO/CAP,
+        # <1% is NEGATIVE — without this the bare "<1%" carries no cue, and the window can
+        # pick up a neighbouring marker's "1+" and read LOW ("ER <1%, PR <1%, HER2 IHC 1+").
+        if name in {"ER", "PR"}:
+            if re.search(r"[<≤]\s*1\s*%", window):
+                return BiomarkerStatus.NEGATIVE, self._grab(window, r"[<≤]\s*1\s*%")
+            pct = re.search(r"\b(\d{1,3})\s*%", window)
+            if pct:
+                value = int(pct.group(1))
+                if value < 1:
+                    return BiomarkerStatus.NEGATIVE, f"{value}%"
+                if value <= 10:
+                    return BiomarkerStatus.LOW, f"{value}%"
+                return BiomarkerStatus.POSITIVE, f"{value}%"
+
+        # PD-L1 is scored numerically (CPS/TPS), so a bare score carries no verbal cue and
+        # would otherwise fall through to UNKNOWN. Thresholds follow the common reporting
+        # convention: CPS >= 10 or TPS >= 50 positive, >= 1 low, else negative.
+        if name == "PD-L1":
+            score = re.search(r"\b(cps|tps)\s*(?:of\s*)?[:=]?\s*(\d{1,3})\s*%?", window)
+            if score:
+                kind, value = score.group(1), int(score.group(2))
+                threshold = 10 if kind == "cps" else 50
+                detail = f"{kind.upper()} {value}"
+                if value >= threshold:
+                    return BiomarkerStatus.POSITIVE, detail
+                return (BiomarkerStatus.LOW if value >= 1 else BiomarkerStatus.NEGATIVE), detail
+
         # Special-case HER2 levels: IHC 1+ / FISH not amplified => LOW; IHC 3+ => POSITIVE.
         if name == "HER2":
+            # "HER2=0" / "HER2 zero" is HER2-null, reported without the "IHC" prefix.
+            if re.search(r"her2\s*[=:]?\s*0\b|her2\s+zero", window):
+                return BiomarkerStatus.LOW, self._grab(window, r"her2\s*[=:]?\s*0\b|her2\s+zero")
             if re.search(r"ihc\s*1\+|ihc\s*0|her2[\s\-]?low|fish[^.]*not amplified|not amplified", window):
                 detail = self._grab(window, r"ihc\s*[0-3]\+|fish[^.,;]*|not amplified|her2[\s\-]?low")
                 return BiomarkerStatus.LOW, detail
@@ -309,11 +385,17 @@ class RulesExtractor:
         left = max(0, start - radius)
         right = min(len(text), end + radius)
         # Pull the left edge forward to just after the last clause break before the marker.
+        # `idx` is an offset into left_chunk, so it must be added to the ORIGINAL left --
+        # accumulating onto a mutated `left` compounds the offsets and pushes the edge
+        # PAST the marker, silently truncating exactly the span that carries the negation.
+        # ("ALK No rearrangement detected (2022-02-14, ...)" clamped to "ement detected (",
+        # losing the "No", so the trailing "detected" read as POSITIVE.)
+        base = left
         left_chunk = text[left:start]
         for sep in (". ", "; ", "\n", ", "):
             idx = left_chunk.rfind(sep)
             if idx != -1:
-                left = max(left, left + idx + len(sep))
+                left = max(left, base + idx + len(sep))
         # Push the right edge back to the first clause break after the marker.
         right_chunk = text[end:right]
         for sep in (". ", "; ", "\n"):
@@ -402,8 +484,15 @@ class RulesExtractor:
         return stage, metastatic
 
     def _ecog(self, lower) -> int | None:
-        m = re.search(r"\becog\s*[:#]?\s*([0-4])\b", lower)
-        return int(m.group(1)) if m else None
+        """Performance status, resolved conservatively when the chart disagrees.
+
+        Charts copy performance status forward, so a stale "ECOG 1" often sits above a
+        current "ECOG 3 documented after two hospitalisations". Taking the first match
+        picks the stale, BETTER score — which matches the patient to `ECOG 0-1` trials
+        they would fail screening for. Higher is worse, so on conflict we keep the worst
+        reading; the conflict is surfaced separately for review."""
+        values = [int(m.group(1)) for m in re.finditer(r"\becog\s*[:#]?\s*([0-4])\b", lower)]
+        return max(values) if values else None
 
     def _organ_flags(self, lower) -> list[str]:
         flags = []

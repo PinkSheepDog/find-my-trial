@@ -1,0 +1,43 @@
+SYNTHETIC TEST DATA - NOT A REAL PATIENT - NOT FOR CLINICAL USE
+Fabricated chart for automated testing. Every name, identifier, date, phone number
+and address below is invented. Contains no PHI and is safe to commit. This file is
+the committed stand-in for the gitignored PHI chart fixtures/phi_chart_her2.txt and
+preserves the same clinical structure: clean HER2-positive metastatic breast cancer.
+
+ONCOLOGY CONSULT NOTE
+Patient: Dana Fictional | MRN: SYNTH-0000-HER2 | DOB: 01/14/1964 | Phone: (555) 0100
+Clinic: Example Cancer Center, 100 Placeholder Ave, Springfield | Referring: Dr. Sample
+
+HISTORY OF PRESENT ILLNESS
+62 year-old female with metastatic HER2-positive breast cancer (invasive ductal
+carcinoma), Stage IV, with liver and bone metastases. Initial diagnosis 2014 with a
+left breast primary; metastatic recurrence documented 2020.
+
+BIOMARKERS - liver core biopsy, IHC/ISH
+HER2 IHC 3+, ISH amplified - HER2 positive.
+ER negative (<1%).
+PR negative (<1%).
+Germline BRCA1/2: negative, no pathogenic variant detected.
+
+IMAGING / SITES OF DISEASE
+Multiple enlarging liver lesions and diffuse osseous metastases on CT.
+No intracranial metastasis on MRI.
+Impression: progressive metastatic disease.
+
+TREATMENT HISTORY
+- Left lumpectomy, then adjuvant doxorubicin/cyclophosphamide followed by paclitaxel.
+- Adjuvant trastuzumab for one year, completed.
+- First-line metastatic paclitaxel plus trastuzumab plus pertuzumab; partial response
+  then progression.
+- Trastuzumab emtansine; stopped after progression.
+
+PERFORMANCE STATUS AND LABS
+ECOG 1. Hemoglobin 10.9 g/dL, ANC 4.1, platelets 240, creatinine 0.9,
+AST 62 U/L, ALT 55 U/L, total bilirubin 0.8 mg/dL.
+Comorbidities: hypertension, type 2 diabetes mellitus. Allergies: penicillin - rash.
+
+PLAN
+Identify recruiting treatment studies for metastatic HER2-positive breast cancer
+after prior HER2-directed therapy. Prefers Illinois or Indiana within ~350 miles.
+Decision support only - do not infer eligibility, recommend therapy, or predict
+outcome.

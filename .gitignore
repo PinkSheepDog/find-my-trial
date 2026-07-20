@@ -32,6 +32,8 @@ backend/data/trials/
 
 # --- Build / cache artifacts ---
 backend/data/index_cache/
+# on-disk trial index cache (~31MB, rebuildable from the CSV)
+backend/data/.index_cache/
 .cache/
 __pycache__/
 *.py[cod]

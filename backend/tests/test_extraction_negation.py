@@ -177,3 +177,79 @@ def test_sclc_still_extracts_when_genuinely_present():
 
 def test_sclc_abbreviation_still_matches():
     assert "Small Cell Lung Cancer" in extract("Dx: SCLC, extensive stage.").cancer_types
+
+
+# ---------------- context-window clamping (panel-line realism) ----------------
+
+def test_negation_survives_preceding_separators_in_a_panel_line():
+    """_window pulls its left edge to the last clause break before the marker. The
+    offsets were added to an already-mutated `left`, so with several separators before
+    the marker the edge overshot PAST it and truncated the negation:
+
+        "...biopsy); ALK No rearrangement detected (2022-02-14, ..."
+                  clamped to ->  "ement detected (2022-02-14, "
+
+    losing the "No", so the trailing "detected" classified as POSITIVE. Isolated
+    one-clause tests could never catch this; real pathology panels always look like
+    the strings below."""
+    cases = [
+        ("Panel (2022-02-14, right lung core biopsy); ALK No rearrangement detected "
+         "(2022-02-14, right lung core biopsy).", "ALK"),
+        ("NGS panel, blood specimen, 2024-01-02; BRCA1 no pathogenic variant detected "
+         "(germline, 2024-01-02).", "BRCA"),
+        ("Results, reported 2023-05-01, reviewed; ROS1 no fusion identified "
+         "(tissue, 2023-05-01).", "ROS1"),
+        ("Molecular, foundation one, 2021-11-03; EGFR no activating mutation detected "
+         "(plasma, 2021-11-03).", "EGFR"),
+    ]
+    for text, marker in cases:
+        status = _status(extract(text), marker)
+        assert status == BiomarkerStatus.NEGATIVE, f"{marker} in {text!r} -> {status}"
+
+
+def test_window_left_edge_never_passes_the_marker():
+    """Directly pin the clamping invariant: whatever separators precede a marker, the
+    window must still contain the marker itself."""
+    import re
+    from app.extraction.rules_extractor import _BIOMARKERS
+    ex = RulesExtractor()
+    text = ("history, prior therapy, imaging 2020-01-01; note, addendum, "
+            "reviewed; ALK no rearrangement detected.").lower()
+    m = re.search(_BIOMARKERS["ALK"], text)
+    window = ex._window(text, m.start(), m.end(), radius=40)
+    assert "alk" in window, f"window lost the marker: {window!r}"
+    assert "no rearrangement detected" in window, f"window lost the negation: {window!r}"
+
+
+# ------------- contradictory mentions must resolve conservatively -------------
+
+def test_conflicting_mentions_never_resolve_to_positive():
+    """Copied-forward problem lists routinely contradict the current specimen. Keeping
+    whichever mention appeared FIRST let a stale "ER positive" outrank a current biopsy's
+    "ER negative", matching an ER-negative patient to endocrine-therapy trials."""
+    p = extract("Breast cancer, Stage IIIA, ER positive. "
+                "ER <1% on the current liver biopsy, ER negative.")
+    assert _status(p, "ER") == BiomarkerStatus.NEGATIVE
+    assert p.biomarker("ER").certainty.value == "uncertain", "conflict must be flagged for review"
+
+
+def test_conflict_resolution_is_order_independent():
+    """The conservative reading must win regardless of which mention is written first."""
+    a = extract("HER2 positive on the 2019 primary. HER2 negative on the current biopsy.")
+    b = extract("HER2 negative on the current biopsy. HER2 positive on the 2019 primary.")
+    assert _status(a, "HER2") == _status(b, "HER2") != BiomarkerStatus.POSITIVE
+
+
+def test_conflict_does_not_downgrade_an_unconflicted_positive():
+    """Conservative resolution must not fire when there is no actual contradiction."""
+    p = extract("Metastatic breast cancer. HER2 IHC 3+, HER2 amplified by FISH.")
+    assert _status(p, "HER2") == BiomarkerStatus.POSITIVE
+
+
+def test_historical_and_current_are_kept_as_separate_records():
+    """Conversion between timepoints is clinically meaningful and must not be collapsed."""
+    p = extract("HER2 IHC 3+ amplified on the 2019 primary specimen (historical). "
+                "HER2 IHC 0, ISH not amplified on the current liver biopsy.")
+    her2 = [b for b in p.biomarkers if b.name == "HER2"]
+    assert len(her2) == 2, [(b.status.value, b.timing.value) for b in her2]
+    assert {b.timing.value for b in her2} == {"historical", "current"}

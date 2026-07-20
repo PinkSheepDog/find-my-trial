@@ -1,0 +1,39 @@
+SYNTHETIC TEST DATA - NOT FOR CLINICAL USE
+CONTRADICTORY EXPORT - the chart disagrees with itself. Nothing here is a real patient.
+Patient: Sam Contradiction | ID: SYNTH-BREAST-CONFLICT-005 | DOB: 1965-03-19 | State: IN
+
+PROBLEM LIST (copied forward from the 2019 clinic note, never reconciled)
+- Breast cancer, Stage IIIA, ER positive.
+- Performance status ECOG 1, tolerating therapy well.
+- Pembrolizumab ACTIVE, continue current therapy.
+
+ONCOLOGY ADDENDUM 2026-07-02 (current, supersedes the copied problem list)
+Assessment: metastatic breast cancer (invasive ductal carcinoma), Stage IV, with liver
+metastases confirmed on biopsy. The Stage IIIA line above is stale and must not be used.
+ER <1% on the current liver biopsy, ER negative. The problem-list ER positive entry
+refers to the 2019 primary and conflicts with today's result; both must be surfaced for
+review rather than silently merged.
+
+Biomarkers:
+HER2 IHC 3+ amplified on the 2019 primary breast specimen (historical specimen).
+HER2 IHC 0, ISH not amplified on the 2026-06-30 liver biopsy (current specimen).
+BRCA1/2 negative, no pathogenic variant detected on the current germline panel.
+
+Performance: ECOG 3 documented 2026-07-02 after two hospitalizations. The ECOG 1 above
+is copied forward from 2019 and is not current.
+
+Treatment history:
+- Left mastectomy and adjuvant doxorubicin/cyclophosphamide followed by paclitaxel.
+- Pembrolizumab; STOPPED 2026-05-04 for immune-mediated colitis grade 3. The problem
+  list still lists it as active; medication status must be stopped, not active.
+
+Labs 2026-07-02: Hemoglobin 9.8 g/dL, ANC 3.2, platelets 190, creatinine 1.0,
+AST 78 U/L, ALT 71 U/L, total bilirubin 1.1 mg/dL.
+Comorbidities: hypertension. Allergies: penicillin - rash.
+Preferences: prefers Indiana or Ohio.
+
+Referral question: identify treatment studies for metastatic breast cancer. Expected
+system behavior: surface the conflicts for clinician review, never resolve a
+contradicted biomarker to POSITIVE, keep the historical HER2 result separate from the
+current one, and never rank a HER2-positive-required study first for this patient.
+Do not infer eligibility, recommend treatment, or predict outcome.
