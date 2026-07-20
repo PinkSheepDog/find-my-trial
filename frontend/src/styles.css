@@ -186,15 +186,80 @@ textarea, input, select {
 }
 textarea { resize: vertical; }
 .intake-actions { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
-.intake-controls h3, .group h3, .block h4 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin: 0 0 8px; }
-.intake-controls label { display: block; margin-bottom: 12px; font-size: 13px; }
-.intake-controls label span { display: block; margin-bottom: 4px; color: var(--muted); }
-.intake-controls .check { display: flex; align-items: center; gap: 8px; margin-bottom: 2px; }
-.intake-controls .check span { margin-bottom: 0; color: var(--ink); }
-.intake-controls .check input { width: 20px; height: 20px; flex: none; }
-.filter-set { border: 1px solid var(--line); border-radius: 9px; padding: 10px 12px; margin: 0 0 14px; min-width: 0; }
-.filter-set legend { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); padding: 0 4px; }
-.filter-help { margin: 0 0 10px; font-size: 11.5px; color: var(--muted); line-height: 1.45; overflow-wrap: anywhere; }
+.group h3, .block h4 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin: 0 0 8px; }
+
+/* ---------------- search settings ----------------
+   A formal, sectioned control panel rather than a loose stack of checkboxes:
+   a titled header, one labelled field per row separated by hairlines, and a
+   single consistent control shape. Palette is limited to the existing brand
+   blue, ink and white — no new hues are introduced. */
+.intake-controls {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  align-self: start;
+  overflow: hidden;
+}
+.controls-head {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--line);
+  background: #f7f9fc;
+}
+.intake-controls h3 {
+  margin: 0;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--brand-dark);
+  font-weight: 700;
+}
+.field { padding: 13px 14px; border-bottom: 1px solid var(--line); min-width: 0; }
+.field:last-child { border-bottom: none; }
+.field > label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink);
+}
+/* One control shape across the panel. `appearance: none` plus an inline chevron
+   keeps selects identical across browsers instead of inheriting three different
+   native widget styles. */
+.field select,
+.field input[type="text"] {
+  width: 100%;
+  min-height: var(--tap);
+  border: 1px solid #c8d1e0;
+  border-radius: 6px;
+  background-color: #fff;
+  color: var(--ink);
+  font: inherit;
+  padding: 8px 11px;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.field select {
+  padding-right: 32px;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%2314307f' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
+.field select:hover:not(:disabled),
+.field input[type="text"]:hover { border-color: var(--brand); }
+.field select:disabled {
+  background-color: #f4f6fb;
+  color: var(--muted);
+  cursor: not-allowed;
+  border-color: var(--line);
+}
+.field-help {
+  margin: 6px 0 0;
+  font-size: 11.5px;
+  color: var(--muted);
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
 
 /* ---------------- buttons ---------------- */
 button.primary { background: var(--brand); color: #fff; border: none; padding: 10px 16px; border-radius: 9px; font-weight: 600; cursor: pointer; }
