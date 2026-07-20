@@ -178,7 +178,12 @@ describe("reasons and cautions accept both response shapes", () => {
     renderBoard([
       trial({ reasons: [{ text: "Likely a good fit", evidence_snippet: "", source_field: "", grounded: false }] }),
     ]);
-    expect(screen.getByText(/no verbatim trial text backs this/i)).toBeInTheDocument();
+    // Assert the behaviour, not the exact sentence: the claim is still shown, it is
+    // labelled unverified, and it is not dressed up as a quote.
+    expect(screen.getByText(/Likely a good fit/)).toBeInTheDocument();
+    expect(screen.getByText(/unverified/i)).toBeInTheDocument();
+    expect(screen.getByText(/verbatim trial text/i)).toBeInTheDocument();
+    expect(document.querySelector(".note-evidence.ungrounded q")).toBeNull();
   });
 
   it("does not label plain strings as ungrounded", () => {

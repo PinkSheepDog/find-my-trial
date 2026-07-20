@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  test:
+  backend:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -22,13 +22,68 @@ jobs:
       - name: Install dependencies
         run: pip install -r backend/requirements.txt
 
-      - name: Fetch trial corpus (synthetic/public; not committed)
+      - name: Fetch + verify trial corpus (public 10k sample; not committed)
+        env:
+          CORPUS_URL: https://github.com/PinkSheepDog/find-my-trial/releases/download/corpus-v1/trials.csv
+          CORPUS_SHA256: 68c28b506e1d9abfd67a0e0069e59ac1f1d148a18c30e8901cd79cbe56ecde0c
         run: |
           mkdir -p backend/data
-          curl -fsSL -o backend/data/trials.csv \
-            "https://github.com/PinkSheepDog/find-my-trial/releases/download/corpus-v1/trials.csv"
+          # The corpus is a single external dependency for the whole gate. Fail loudly
+          # and say so, rather than letting tests skip themselves into a green run.
+          if ! curl -fsSL --retry 3 --retry-delay 5 -o backend/data/trials.csv.part "$CORPUS_URL"; then
+            echo "::error::Could not fetch the trial corpus from $CORPUS_URL."
+            echo "::error::The release gate cannot run without it. This is a hard failure, not a skip."
+            exit 1
+          fi
+          echo "$CORPUS_SHA256  backend/data/trials.csv.part" | sha256sum -c - \
+            || { echo "::error::Corpus failed checksum verification — refusing to test against it."; exit 1; }
+          mv backend/data/trials.csv.part backend/data/trials.csv
           wc -l backend/data/trials.csv
 
-      - name: Run tests + synthetic-EHR benchmark gate
+      - name: Tests + synthetic-EHR benchmark release gate
         working-directory: backend
         run: python -m pytest -q
+
+      - name: Benchmark scorecard (machine-readable)
+        working-directory: backend
+        run: python benchmark/run_benchmark.py --json ../benchmark-scorecard.json
+
+      - name: Upload benchmark scorecard
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-scorecard
+          path: benchmark-scorecard.json
+          if-no-files-found: warn
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Tests (incl. viewport-overflow + accessibility regressions)
+        working-directory: frontend
+        # Guard rather than assume: if the test script is ever removed, say so instead
+        # of passing silently.
+        run: |
+          if npm run | grep -qE '^\s*test$'; then
+            npm test
+          else
+            echo "::error::No \"test\" script in frontend/package.json — frontend tests are not running."
+            exit 1
+          fi
+
+      - name: Build
+        working-directory: frontend
+        run: npm run build
