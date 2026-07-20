@@ -65,6 +65,9 @@ class MatchingPipeline:
         else:
             results = self._det_reranker.rerank(profile, candidates, top_k)
 
+        location_query = (filters.location or "").strip() or ", ".join(profile.location_preferences).strip()
+        location_hits = sum(1 for r in results if r.location_match)
+
         return MatchResponse(
             results=results,
             candidate_count=len(candidates),
@@ -72,6 +75,9 @@ class MatchingPipeline:
             semantic_used=self._llm_enabled,
             degraded_mode=not self._llm_enabled,
             fallback_hint=self._fallback_hint(results, filters),
+            location_query=location_query,
+            location_match_count=location_hits,
+            location_notice=_location_notice(location_query, location_hits, len(results), filters),
         )
 
     async def run(
@@ -89,9 +95,29 @@ class MatchingPipeline:
     def _fallback_hint(results, filters: RetrievalFilters) -> str | None:
         if results:
             return None
+        if filters.location_required and filters.location:
+            return (f"No trials with a listed study site in {filters.location} cleared the filters. "
+                    "Turn off 'sites in this location only' to see trials elsewhere.")
+        if filters.recruiting_only:
+            return ("No actively RECRUITING trials cleared the filters. Try 'active' instead of "
+                    "'recruiting only' to include studies that are running but closed to new patients.")
         if filters.active_only and filters.interventional_only:
             return "No active interventional trials cleared the filters. Try relaxing 'recruiting only' or 'interventional only'."
         return "No trials cleared the current filters. Try broader chart text."
+
+
+def _location_notice(location_query: str, hits: int, total: int, filters: RetrievalFilters) -> str | None:
+    """Geography is a strong ranking boost, not a hard filter (a hard filter empties the
+    board on sparse site data). So when a location was requested the board must SAY when
+    it could not honour it, rather than quietly returning trials from anywhere."""
+    if not location_query or not total:
+        return None
+    if hits == 0:
+        return (f"No listed study site in {location_query} among these results — every trial "
+                "shown is elsewhere. Verify remote/satellite participation before referral.")
+    if hits < total:
+        return f"{hits} of {total} results have a listed study site in {location_query}."
+    return None
 
 
 # --- Abstention ---------------------------------------------------------------
@@ -132,5 +158,19 @@ def _abstention(profile: PatientProfile) -> tuple[bool, list[str]]:
         present += 1
     else:
         missing.append("A resolved biomarker result (pending/missing does not count)")
+
+    # An unrecognized disease family is disqualifying on its own, not merely one absent
+    # fact among five. The wrong-disease gate admits a trial only when the patient's and
+    # the trial's families are BOTH known and disjoint, so with no patient family the
+    # gate is inert and the board is unfiltered lexical similarity. Counting it as one
+    # interchangeable fact meant a rare cancer with stage + ECOG + therapy recorded
+    # produced a confident-looking ranked list that no disease check had ever seen.
+    if not patient_disease_families(profile):
+        return (True, [
+            "Primary cancer not recognized — the disease filter cannot run, so results "
+            "would be ranked on wording alone. Confirm the diagnosis, or treat any "
+            "tumour-agnostic (basket) study below as the only candidates.",
+            *missing,
+        ])
 
     return (present < _MIN_CORE_FACTS, missing)

@@ -1,9 +1,10 @@
 {
-  "schema_version": "find-my-trial-synthetic-profile-2.0",
+  "schema_version": "find-my-trial-synthetic-profile-2.1",
   "synthetic_test_data": true,
   "not_for_clinical_use": true,
   "case_id": "case_01_clean_her2_positive_breast",
   "patient_local_id": "SYNTH-BREAST-HER2-001",
+  "case_type": "clean",
   "facts": [
     {
       "fact_type": "primary_disease",
@@ -204,5 +205,74 @@
     "trial eligibility",
     "treatment recommendation",
     "prognosis"
-  ]
+  ],
+  "expected_extraction": {
+    "disease_families": {
+      "present": [
+        "breast cancer"
+      ],
+      "absent": [
+        "non-small cell lung cancer",
+        "small cell lung cancer",
+        "melanoma",
+        "gastric cancer",
+        "biliary tract cancer"
+      ]
+    },
+    "is_metastatic": true,
+    "ecog": 1,
+    "metastatic_sites": {
+      "present": [
+        "liver",
+        "bone"
+      ],
+      "absent": [
+        "brain"
+      ]
+    },
+    "biomarkers": [
+      {
+        "name": "HER2",
+        "direction": "positive",
+        "timing": "current",
+        "evidence": "HER2 IHC 3+"
+      },
+      {
+        "name": "ER",
+        "direction": "negative",
+        "timing": "current",
+        "evidence": "ER Negative (<1%)"
+      },
+      {
+        "name": "PR",
+        "direction": "negative",
+        "timing": "current",
+        "evidence": "PR Negative (<1%)"
+      }
+    ],
+    "therapies_present": [
+      "Trastuzumab",
+      "Pertuzumab",
+      "Paclitaxel",
+      "Doxorubicin",
+      "Cyclophosphamide"
+    ]
+  },
+  "expected_behavior": {
+    "abstains": false,
+    "expect_results": true,
+    "wrong_disease_at_10": 0,
+    "wrong_purpose_at_10": 0,
+    "no_contraindicated_rank_1": true,
+    "expected_cautions": [
+      "LFT elevation"
+    ]
+  },
+  "expected_retrieval": {
+    "selection_criteria": "Regression anchors, not a clinical endorsement: interventional TREATMENT studies in the patient's disease family that are recruiting or not-yet-recruiting, carry no biomarker-direction contraindication for this patient, and target the patient's positive biomarker (HER2).",
+    "must_rank_top_3": [
+      "NCT05760612",
+      "NCT06714617"
+    ]
+  }
 }

@@ -1,0 +1,228 @@
+{
+  "schema_version": "find-my-trial-synthetic-profile-2.1",
+  "synthetic_test_data": true,
+  "not_for_clinical_use": true,
+  "case_id": "case_05_contradictory_breast_her2_conflict",
+  "patient_local_id": "SYNTH-BREAST-CONFLICT-005",
+  "case_type": "contradictory",
+  "facts": [
+    {
+      "fact_type": "primary_disease",
+      "value": "Metastatic breast invasive ductal carcinoma",
+      "status": "current",
+      "effective_date": "2026-07-02",
+      "source": {
+        "file": "source_note.txt",
+        "resource_or_section": "ONCOLOGY ADDENDUM 2026-07-02",
+        "evidence_text": "metastatic breast cancer (invasive ductal carcinoma), Stage IV"
+      },
+      "review_state": "confirm"
+    },
+    {
+      "fact_type": "disease_family",
+      "value": "breast cancer",
+      "status": "current",
+      "effective_date": "2026-07-02",
+      "source": {
+        "file": "source_note.txt",
+        "resource_or_section": "ONCOLOGY ADDENDUM 2026-07-02",
+        "evidence_text": "metastatic breast cancer"
+      },
+      "review_state": "confirm"
+    },
+    {
+      "fact_type": "stage",
+      "value": "Stage IV",
+      "status": "current",
+      "effective_date": "2026-07-02",
+      "source": {
+        "file": "source_note.txt",
+        "resource_or_section": "ONCOLOGY ADDENDUM 2026-07-02",
+        "evidence_text": "Stage IV, with liver metastases confirmed on biopsy"
+      },
+      "review_state": "conflicting",
+      "conflict_with": "Problem list copied forward from 2019 states Stage IIIA"
+    },
+    {
+      "fact_type": "metastatic_sites",
+      "value": [
+        "liver"
+      ],
+      "status": "current",
+      "effective_date": "2026-07-02",
+      "source": {
+        "file": "source_note.txt",
+        "resource_or_section": "ONCOLOGY ADDENDUM 2026-07-02",
+        "evidence_text": "liver metastases confirmed on biopsy"
+      },
+      "review_state": "confirm"
+    },
+    {
+      "fact_type": "biomarker.her2",
+      "value": "IHC 3+ amplified",
+      "status": "historical",
+      "effective_date": "2019-01-01",
+      "method": "IHC",
+      "specimen": "2019 primary breast specimen",
+      "source": {
+        "file": "source_note.txt",
+        "resource_or_section": "Biomarkers",
+        "evidence_text": "HER2 IHC 3+ amplified on the 2019 primary breast specimen"
+      },
+      "review_state": "confirm"
+    },
+    {
+      "fact_type": "biomarker.her2",
+      "value": "IHC 0; ISH not amplified",
+      "status": "current",
+      "effective_date": "2026-06-30",
+      "method": "IHC/ISH",
+      "specimen": "Liver biopsy",
+      "source": {
+        "file": "source_note.txt",
+        "resource_or_section": "Biomarkers",
+        "evidence_text": "HER2 IHC 0, ISH not amplified on the 2026-06-30 liver biopsy"
+      },
+      "review_state": "confirm"
+    },
+    {
+      "fact_type": "biomarker.er",
+      "value": "Negative (<1%)",
+      "status": "current",
+      "effective_date": "2026-07-02",
+      "specimen": "Liver biopsy",
+      "source": {
+        "file": "source_note.txt",
+        "resource_or_section": "ONCOLOGY ADDENDUM 2026-07-02",
+        "evidence_text": "ER <1% on the current liver biopsy, ER negative"
+      },
+      "review_state": "conflicting",
+      "conflict_with": "Copied-forward problem list states ER positive (2019 primary)"
+    },
+    {
+      "fact_type": "biomarker.brca",
+      "value": "Negative",
+      "status": "current",
+      "effective_date": "2026-07-02",
+      "method": "germline panel",
+      "source": {
+        "file": "source_note.txt",
+        "resource_or_section": "Biomarkers",
+        "evidence_text": "BRCA1/2 negative, no pathogenic variant detected"
+      },
+      "review_state": "confirm"
+    },
+    {
+      "fact_type": "performance_status_ecog",
+      "value": 3,
+      "status": "current",
+      "effective_date": "2026-07-02",
+      "source": {
+        "file": "source_note.txt",
+        "resource_or_section": "Performance",
+        "evidence_text": "ECOG 3 documented 2026-07-02 after two hospitalizations"
+      },
+      "review_state": "conflicting",
+      "conflict_with": "Copied-forward problem list states ECOG 1 (2019)"
+    },
+    {
+      "fact_type": "treatment_history",
+      "value": "Pembrolizumab",
+      "status": "stopped",
+      "effective_period": {
+        "start": "2025-01-01",
+        "end": "2026-05-04"
+      },
+      "outcome": "Stopped for immune-mediated colitis grade 3",
+      "source": {
+        "file": "source_note.txt",
+        "resource_or_section": "Treatment history",
+        "evidence_text": "Pembrolizumab; STOPPED 2026-05-04 for immune-mediated colitis grade 3"
+      },
+      "review_state": "conflicting",
+      "conflict_with": "Copied-forward problem list lists pembrolizumab as ACTIVE"
+    }
+  ],
+  "missing_or_review_required": [
+    "Which ER result is current \u2014 the 2019 problem-list entry or the 2026 biopsy",
+    "Reconciled stage (problem list Stage IIIA vs addendum Stage IV)",
+    "Reconciled performance status (copied ECOG 1 vs current ECOG 3)"
+  ],
+  "expected_system_behavior": "Surface every contradiction for clinician review. Never resolve a contradicted biomarker to POSITIVE, keep the historical HER2 result separate from the current one, prefer the dated current value over copied-forward text, and never rank a HER2-positive-required study first for a patient whose current specimen is HER2 IHC 0.",
+  "must_not_infer": [
+    "trial eligibility",
+    "treatment recommendation",
+    "prognosis"
+  ],
+  "expected_extraction": {
+    "disease_families": {
+      "present": [
+        "breast cancer"
+      ],
+      "absent": [
+        "non-small cell lung cancer",
+        "small cell lung cancer",
+        "hepatocellular carcinoma",
+        "melanoma"
+      ]
+    },
+    "is_metastatic": true,
+    "ecog": 3,
+    "metastatic_sites": {
+      "present": [
+        "liver"
+      ],
+      "absent": [
+        "bone",
+        "brain"
+      ]
+    },
+    "biomarkers": [
+      {
+        "name": "HER2",
+        "direction": "low",
+        "timing": "current",
+        "evidence": "HER2 IHC 0, ISH not amplified on the 2026-06-30 liver biopsy"
+      },
+      {
+        "name": "HER2",
+        "direction": "positive",
+        "timing": "historical",
+        "evidence": "HER2 IHC 3+ amplified on the 2019 primary breast specimen"
+      },
+      {
+        "name": "ER",
+        "direction": "negative",
+        "timing": "current",
+        "evidence": "ER <1% on the current liver biopsy"
+      },
+      {
+        "name": "BRCA",
+        "direction": "negative",
+        "timing": "current",
+        "evidence": "BRCA1/2 negative, no pathogenic variant detected"
+      }
+    ],
+    "therapies_present": [
+      "Pembrolizumab",
+      "Doxorubicin",
+      "Cyclophosphamide",
+      "Paclitaxel"
+    ]
+  },
+  "expected_behavior": {
+    "abstains": false,
+    "expect_results": true,
+    "wrong_disease_at_10": 0,
+    "wrong_purpose_at_10": 0,
+    "no_contraindicated_rank_1": true,
+    "expected_cautions": [
+      "LFT elevation",
+      "checkpoint-therapy exclusions"
+    ]
+  },
+  "expected_retrieval": {
+    "selection_criteria": "No ranking anchors are declared: this case exists to pin conflict handling, not board order.",
+    "must_rank_top_3": []
+  }
+}

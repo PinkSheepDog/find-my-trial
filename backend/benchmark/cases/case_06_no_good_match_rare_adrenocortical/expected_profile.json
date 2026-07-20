@@ -1,0 +1,177 @@
+{
+  "schema_version": "find-my-trial-synthetic-profile-2.1",
+  "synthetic_test_data": true,
+  "not_for_clinical_use": true,
+  "case_id": "case_06_no_good_match_rare_adrenocortical",
+  "patient_local_id": "SYNTH-ACC-NOMATCH-006",
+  "case_type": "no_good_match",
+  "facts": [
+    {
+      "fact_type": "primary_disease",
+      "value": "Metastatic adrenocortical carcinoma",
+      "status": "current",
+      "effective_date": "2026-06-18",
+      "source": {
+        "file": "source_note.txt",
+        "resource_or_section": "Assessment",
+        "evidence_text": "metastatic adrenocortical carcinoma, Stage IV"
+      },
+      "review_state": "confirm"
+    },
+    {
+      "fact_type": "disease_family",
+      "value": "adrenocortical carcinoma",
+      "status": "current",
+      "effective_date": "2026-06-18",
+      "source": {
+        "file": "source_note.txt",
+        "resource_or_section": "Assessment",
+        "evidence_text": "rare endocrine malignancy; it is NOT a lung, breast, or hepatic primary"
+      },
+      "review_state": "needs-review",
+      "note": "No trial in this corpus names this family; the corpus cannot serve it."
+    },
+    {
+      "fact_type": "stage",
+      "value": "Stage IV",
+      "status": "current",
+      "effective_date": "2026-06-18",
+      "source": {
+        "file": "source_note.txt",
+        "resource_or_section": "Assessment",
+        "evidence_text": "Stage IV, with liver and lung metastases"
+      },
+      "review_state": "confirm"
+    },
+    {
+      "fact_type": "metastatic_sites",
+      "value": [
+        "liver",
+        "lung"
+      ],
+      "status": "current",
+      "effective_date": "2026-06-18",
+      "source": {
+        "file": "source_note.txt",
+        "resource_or_section": "Assessment",
+        "evidence_text": "liver and lung metastases on imaging dated 2026-06-18"
+      },
+      "review_state": "confirm"
+    },
+    {
+      "fact_type": "biomarker.tp53",
+      "value": "No pathogenic variant detected",
+      "status": "current",
+      "effective_date": "2026-06-18",
+      "source": {
+        "file": "source_note.txt",
+        "resource_or_section": "Biomarkers",
+        "evidence_text": "TP53 no pathogenic variant detected"
+      },
+      "review_state": "confirm"
+    },
+    {
+      "fact_type": "biomarker.msi",
+      "value": "Stable",
+      "status": "current",
+      "effective_date": "2026-06-18",
+      "source": {
+        "file": "source_note.txt",
+        "resource_or_section": "Biomarkers",
+        "evidence_text": "MSI stable"
+      },
+      "review_state": "confirm"
+    },
+    {
+      "fact_type": "performance_status_ecog",
+      "value": 1,
+      "status": "current",
+      "effective_date": "2026-07-05",
+      "source": {
+        "file": "source_note.txt",
+        "resource_or_section": "Performance",
+        "evidence_text": "ECOG 1 on 2026-07-05"
+      },
+      "review_state": "confirm"
+    },
+    {
+      "fact_type": "treatment_history",
+      "value": "Mitotane",
+      "status": "stopped",
+      "effective_period": {
+        "start": "2023-06-01",
+        "end": "2024-09-14"
+      },
+      "outcome": "Stopped for progression",
+      "source": {
+        "file": "source_note.txt",
+        "resource_or_section": "Treatment history",
+        "evidence_text": "Mitotane [stopped]; stopped for progression"
+      },
+      "review_state": "confirm"
+    }
+  ],
+  "missing_or_review_required": [
+    "Whether any adrenocortical-carcinoma study exists outside this corpus"
+  ],
+  "expected_system_behavior": "The chart is complete, but the corpus holds no study for this disease. The system must NOT present a confident ranked list: it must abstain, return nothing, or return only clearly-labelled tumour-agnostic basket studies at low fit. It must never surface a study for a different primary cancer because chemotherapy names, metastatic sites, or generic oncology language overlap.",
+  "must_not_infer": [
+    "trial eligibility",
+    "treatment recommendation",
+    "prognosis"
+  ],
+  "expected_extraction": {
+    "disease_families": {
+      "present": [],
+      "absent": [
+        "breast cancer",
+        "non-small cell lung cancer",
+        "small cell lung cancer",
+        "hepatocellular carcinoma",
+        "gastric cancer",
+        "cervical cancer",
+        "pancreatic cancer",
+        "head and neck cancer"
+      ]
+    },
+    "is_metastatic": true,
+    "ecog": 1,
+    "metastatic_sites": {
+      "present": [
+        "liver",
+        "lung"
+      ],
+      "absent": [
+        "bone",
+        "brain"
+      ]
+    },
+    "biomarkers": [
+      {
+        "name": "MSI",
+        "direction": "negative",
+        "timing": "current",
+        "evidence": "MSI stable"
+      }
+    ],
+    "therapies_present": [
+      "Cisplatin",
+      "Doxorubicin"
+    ],
+    "note": "The metastatic liver/lung findings must never be normalized into a hepatocellular or lung PRIMARY."
+  },
+  "expected_behavior": {
+    "abstains_or_returns_nothing_suitable": true,
+    "expect_results": false,
+    "wrong_disease_at_10": 0,
+    "wrong_purpose_at_10": 0,
+    "no_contraindicated_rank_1": true,
+    "max_match_score": 60,
+    "only_basket_studies": true,
+    "expected_cautions": []
+  },
+  "expected_retrieval": {
+    "selection_criteria": "None \u2014 no study in this corpus serves this disease.",
+    "must_rank_top_3": []
+  }
+}

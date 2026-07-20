@@ -1,0 +1,34 @@
+SYNTHETIC TEST DATA - NOT FOR CLINICAL USE
+NO-GOOD-MATCH CASE - the chart is complete and unambiguous, but this corpus contains no
+suitable study for the disease. Nothing here is a real patient.
+Patient: Alex Raredisease | ID: SYNTH-ACC-NOMATCH-006 | DOB: 1963-11-05 | State: OH
+
+Assessment: metastatic adrenocortical carcinoma, Stage IV, with liver and lung
+metastases on imaging dated 2026-06-18. Histology confirmed on adrenal core biopsy.
+This is a rare endocrine malignancy; it is NOT a lung, breast, or hepatic primary. The
+liver and lung findings are metastases from the adrenocortical primary.
+
+Biomarkers (adrenal core biopsy 2026-06-18):
+TP53 no pathogenic variant detected.
+MSI stable.
+PD-L1 not tested; result unavailable.
+
+Treatment history:
+- 2023-04-11: Right adrenalectomy [completed].
+- 2023-06-01 to 2024-09-14: Mitotane [stopped]; stopped for progression.
+- 2024-10-02 to 2025-08-19: Etoposide, doxorubicin and cisplatin plus mitotane
+  [completed]; partial response then progression.
+
+Performance: ECOG 1 on 2026-07-05.
+Labs 2026-07-05: Hemoglobin 11.6 g/dL, ANC 4.4, platelets 255, creatinine 0.9,
+AST 30 U/L, ALT 28 U/L, total bilirubin 0.6 mg/dL.
+Comorbidities: hypertension. Allergies: no known drug allergies.
+Preferences: prefers Ohio or Michigan.
+
+Referral question: identify recruiting treatment studies for metastatic adrenocortical
+carcinoma. Expected system behavior: this corpus holds no adrenocortical-carcinoma
+study, so the system must NOT present a confident ranked list. It must abstain, return
+nothing, or return only clearly-labelled tumour-agnostic basket studies at low fit — and
+must never surface a study for a different primary cancer (breast, lung, liver) merely
+because chemotherapy names, metastatic sites, or generic oncology language overlap.
+Do not infer eligibility, recommend treatment, or predict outcome.

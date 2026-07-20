@@ -1,0 +1,38 @@
+SYNTHETIC TEST DATA - NOT A REAL PATIENT - NOT FOR CLINICAL USE
+Fabricated messy EHR export for automated testing. All names, identifiers, dates,
+phone numbers and addresses are invented. Contains no PHI and is safe to commit.
+This file is the committed stand-in for the gitignored PHI chart
+fixtures/phi_chart_tnbc.txt and preserves the same clinical structure: a messy
+metastatic TNBC / HER2-low export with copy-forward contradictions and negations.
+
+EHR export combined 07/14/2026 - copied sections + addenda, chronology may be mixed.
+pt Robin Placeholder / SYNTH-0000-TNBC / 64F / phone (555) 0142 / 200 Example St
+
+old 2018 record: left breast IDC, ER-/PR-, HER2 0 on the primary breast specimen.
+lumpectomy then ddAC -> taxol. later metastatic recurrence in lung 2024.
+dx line reads triple-negative breast cancer per the 2018 primary.
+
+copied problem list says capecitabine ACTIVE and 'continue current therapy'. this text
+was copied forward from 2025. ADDENDUM 05/12/26: CAPECITABINE STOPPED for scan
+progression. medication status must be stopped, not active.
+
+lung bx 05/22/26 - current metastatic specimen, IHC/ISH:
+HER2 IHC 1+, ISH not amplified.
+PD-L1 CPS 15, positive.
+BRCA1/2 negative, no pathogenic variant identified.
+MSI stable.
+HRD borderline.
+historical primary breast specimen HER2 = 0. keep both with date/specimen.
+
+CT 06/28/26 pulmonary nodules slightly larger + small right pleural effusion. NO focal
+liver lesion. NO osseous lesion. do not turn negative statements into metastases.
+
+therapy log: ddAC, then paclitaxel, then carboplatin plus gemcitabine, then
+atezolizumab plus nab-paclitaxel - atezolizumab stopped for immune-mediated hepatitis
+grade 3. capecitabine after that, now stopped.
+
+labs 07/10/26 Hgb 10.8, ANC 3.9, Plt 268, Cr 1.1, AST 42 ALT 38 Tbili 0.7. ECOG 2.
+HTN/DM2. PCN rash. denies tobacco.
+
+wants treatment studies. prefers Ohio or Indiana <= ~250 mi; treating oncologist
+coordinates. no eligibility decision or treatment recommendation in this export.

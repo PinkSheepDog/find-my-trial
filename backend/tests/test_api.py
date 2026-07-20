@@ -94,8 +94,14 @@ def test_deidentify_then_match_flow(client):
     # Clinical signal survives.
     assert "HER2" in deid_text
 
+    # Egress gate: the scrubbed text must be explicitly approved before matching.
+    a = client.post("/api/approve-deid", json={"text": deid_text}, headers=headers)
+    assert a.status_code == 200, a.text
+    approval = a.json()["approval_token"]
+
     m = client.post("/api/match", json={"deidentified_text": deid_text, "top_k": 5,
-                    "active_only": False, "interventional_only": False}, headers=headers)
+                    "active_only": False, "interventional_only": False},
+                    headers={**headers, "X-Deid-Approval": approval})
     assert m.status_code == 200, m.text
     body = m.json()
     assert body["profile"]["age"] == 62
@@ -105,19 +111,63 @@ def test_deidentify_then_match_flow(client):
     assert body["match"]["degraded_mode"] is True  # no LLM key in test env
 
 
-def test_match_rescrubs_phi_defense_in_depth(client):
-    """If a client mistakenly posts text that still contains an identifier, /api/match
-    must scrub it before the pipeline — PHI must never reach extraction/LLM."""
+LEAKY = "Patient Name: John Q. Public, 55 year old male with lung cancer, EGFR positive."
+
+
+def test_match_refuses_unapproved_text(client):
+    """The egress bypass this suite used to demonstrate: posting chart text straight
+    to /api/match, skipping the human review gate entirely. It must now be refused."""
+    csrf = _login(client)
+    m = client.post("/api/match", json={"deidentified_text": LEAKY, "top_k": 3,
+                    "active_only": False, "interventional_only": False},
+                    headers={"x-csrf-token": csrf})
+    assert m.status_code == 403, m.text
+    assert "approved" in m.json()["error"].lower()
+    assert "John" not in m.text  # the refusal must not echo the submitted text
+
+
+def test_approval_refuses_text_that_still_has_identifiers(client):
+    """Approval is not a rubber stamp — text carrying identifiers cannot be approved,
+    so a caller cannot simply approve raw chart text to obtain a token."""
+    csrf = _login(client)
+    a = client.post("/api/approve-deid", json={"text": LEAKY}, headers={"x-csrf-token": csrf})
+    assert a.status_code == 422, a.text
+    assert "John" not in a.text
+
+
+def test_approval_token_does_not_transfer_to_other_text(client):
+    """A token approved for one chart must not license matching a different one."""
     csrf = _login(client)
     headers = {"x-csrf-token": csrf}
-    leaky = "Patient Name: John Q. Public, 55 year old male with lung cancer, EGFR positive."
-    m = client.post("/api/match", json={"deidentified_text": leaky, "top_k": 3,
-                    "active_only": False, "interventional_only": False}, headers=headers)
-    assert m.status_code == 200, m.text
-    # The returned profile/evidence must not contain the leaked name.
-    blob = m.text
-    assert "John Q. Public" not in blob
-    assert "John" not in blob or "Public" not in blob
+    approved = "[NAME], [AGE] male with lung cancer, EGFR positive, ECOG 1."
+    token = client.post("/api/approve-deid", json={"text": approved},
+                        headers=headers).json()["approval_token"]
+    m = client.post("/api/match",
+                    json={"deidentified_text": "[NAME], [AGE] female with breast cancer.",
+                          "top_k": 3, "active_only": False, "interventional_only": False},
+                    headers={**headers, "X-Deid-Approval": token})
+    assert m.status_code == 403, m.text
+
+
+def test_match_rescrubs_phi_defense_in_depth(client):
+    """Second control, independent of the gate: even an approved payload is re-scrubbed,
+    so PHI can never reach extraction/LLM. Exercised here by disabling the gate, which
+    is what a development deployment (FMT_REQUIRE_DEID_REVIEW=false) actually does."""
+    from app.config import get_settings
+    settings = get_settings()
+    original = settings.require_deid_review
+    settings.require_deid_review = False
+    try:
+        csrf = _login(client)
+        m = client.post("/api/match", json={"deidentified_text": LEAKY, "top_k": 3,
+                        "active_only": False, "interventional_only": False},
+                        headers={"x-csrf-token": csrf})
+        assert m.status_code == 200, m.text
+        blob = m.text
+        assert "John Q. Public" not in blob
+        assert "John" not in blob or "Public" not in blob
+    finally:
+        settings.require_deid_review = original
 
 
 def test_logout_revokes_session(client):

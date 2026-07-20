@@ -58,7 +58,11 @@ def test_fhir_keeps_historical_and_current_biomarker():
     # The CURRENT reading drives matching, and it is not positive (HER2-low).
     assert profile.biomarker("HER2").is_current
     assert profile.biomarker("HER2").status != BiomarkerStatus.POSITIVE
-    assert not profile.positive_biomarkers()  # historical/low must not count as a current positive
+    # A historical or low HER2 must never surface as a current positive. Scoped to HER2:
+    # this case also carries PD-L1 CPS 15, which IS a true current positive (and is
+    # required by the case's own expected_profile.json), so asserting that NO biomarker
+    # is positive would contradict the fixture.
+    assert "HER2" not in {b.name for b in profile.positive_biomarkers()}
 
 
 def test_nsclc_not_classified_as_small_cell():

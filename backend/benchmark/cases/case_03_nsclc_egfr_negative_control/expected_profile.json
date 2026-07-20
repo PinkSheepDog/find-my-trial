@@ -1,9 +1,10 @@
 {
-  "schema_version": "find-my-trial-synthetic-profile-2.0",
+  "schema_version": "find-my-trial-synthetic-profile-2.1",
   "synthetic_test_data": true,
   "not_for_clinical_use": true,
   "case_id": "case_03_nsclc_egfr_negative_control",
   "patient_local_id": "SYNTH-LUNG-EGFR-003",
+  "case_type": "clean",
   "facts": [
     {
       "fact_type": "primary_disease",
@@ -170,5 +171,63 @@
     "trial eligibility",
     "treatment recommendation",
     "prognosis"
-  ]
+  ],
+  "expected_extraction": {
+    "disease_families": {
+      "present": [
+        "non-small cell lung cancer"
+      ],
+      "absent": [
+        "small cell lung cancer",
+        "breast cancer",
+        "melanoma",
+        "gastric cancer",
+        "biliary tract cancer"
+      ]
+    },
+    "is_metastatic": true,
+    "ecog": 1,
+    "metastatic_sites": {
+      "present": [
+        "lung"
+      ],
+      "absent": [
+        "breast",
+        "brain"
+      ]
+    },
+    "biomarkers": [
+      {
+        "name": "EGFR",
+        "direction": "positive",
+        "timing": "current",
+        "evidence": "EGFR Exon 19 deletion"
+      },
+      {
+        "name": "ALK",
+        "direction": "negative",
+        "timing": "current",
+        "evidence": "ALK No rearrangement detected"
+      }
+    ],
+    "therapies_present": [
+      "Osimertinib",
+      "Carboplatin"
+    ]
+  },
+  "expected_behavior": {
+    "abstains": false,
+    "expect_results": true,
+    "wrong_disease_at_10": 0,
+    "wrong_purpose_at_10": 0,
+    "no_contraindicated_rank_1": true,
+    "expected_cautions": []
+  },
+  "expected_retrieval": {
+    "selection_criteria": "Regression anchors, not a clinical endorsement: recruiting interventional TREATMENT studies in non-small cell lung cancer that address the patient's EGFR-mutant, post-osimertinib setting and carry no contraindication.",
+    "must_rank_top_3": [
+      "NCT05261399",
+      "NCT05011487"
+    ]
+  }
 }

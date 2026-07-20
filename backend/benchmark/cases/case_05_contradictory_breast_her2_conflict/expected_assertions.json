@@ -1,0 +1,46 @@
+{
+  "case_id": "case_05_contradictory_breast_her2_conflict",
+  "patient_local_id": "SYNTH-BREAST-CONFLICT-005",
+  "assertions": [
+    {
+      "id": "primary-disease-preserved",
+      "severity": "error",
+      "assertion": "Primary disease family equals breast cancer."
+    },
+    {
+      "id": "purpose-gate",
+      "severity": "error",
+      "assertion": "Treatment query must not be satisfied by imaging, screening, registry, or observational studies."
+    },
+    {
+      "id": "no-eligibility-claim",
+      "severity": "error",
+      "assertion": "No output states or implies final eligibility."
+    },
+    {
+      "id": "her2-history",
+      "severity": "error",
+      "assertion": "Historical HER2 IHC 3+ and current HER2 IHC 0/ISH-not-amplified are both retained and kept separate."
+    },
+    {
+      "id": "conflict-never-positive",
+      "severity": "error",
+      "assertion": "A biomarker with contradictory mentions is never resolved to POSITIVE; the current specimen wins and the conflict is flagged for review."
+    },
+    {
+      "id": "no-contraindicated-rank-1",
+      "severity": "error",
+      "assertion": "A study requiring HER2-positive is never ranked first for this HER2 IHC 0 patient."
+    },
+    {
+      "id": "wrong-disease-zero",
+      "severity": "error",
+      "assertion": "No other-primary-cancer study enters the top 10."
+    },
+    {
+      "id": "copied-forward-medication",
+      "severity": "error",
+      "assertion": "Pembrolizumab is stopped despite copied-forward 'ACTIVE' text."
+    }
+  ]
+}

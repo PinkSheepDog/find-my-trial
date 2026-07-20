@@ -21,8 +21,11 @@ committed real patient PHI and a 33 MB CSV into git. This rebuild fixes all of t
 by design:
 
 - **Biomarker direction is first-class.** A biomarker is a `(name, status)` pair
-  where status ∈ {positive, negative, low, equivocal, unknown}. "Negative-read-as-
-  positive" is representationally impossible. Proven by regression tests.
+  where status ∈ {positive, negative, low, equivocal, unknown}, so a direction can
+  never be *dropped* or left implicit. Note the limit of that guarantee: the type
+  prevents ambiguous *representation*, it does not prevent an extractor assigning a
+  confidently wrong status — that is a matter of extraction rules and the tests that
+  hold them honest. See "Known limitations".
 - **HIPAA-conscious by construction.** Patient text is de-identified *before* any
   external call, a human reviews the scrubbed text before egress, nothing patient-
   related is persisted, and `/api/match` re-scrubs as defense-in-depth.
@@ -57,21 +60,33 @@ upload/paste ─► extract text (local: PDF/DOCX/TXT, OCR for scans)
 
 ## Quickstart (local)
 
-### 1. Backend
+From a clean checkout, on macOS/Linux, the Makefile is the shortest path:
+
+```bash
+make setup      # create backend/.venv and install pinned deps
+make corpus     # download + CHECKSUM-VERIFY the trial corpus
+cp .env.example .env   # then edit .env (see required values below)
+make test       # full suite incl. the benchmark release gate
+make run        # API on http://127.0.0.1:8000
+make frontend   # build the React app (or `cd frontend && npm run dev`)
+```
+
+`make corpus` fetches the public corpus from the `corpus-v1` GitHub Release and
+verifies its SHA-256 before installing it, so a swapped or truncated asset fails
+loudly instead of being silently indexed.
+
+<details>
+<summary>Windows / PowerShell equivalents</summary>
 
 ```powershell
 cd backend
 py -3.11 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-```
-
-Create the env file and a trial corpus:
-
-```powershell
 copy ..\.env.example ..\.env       # then edit ..\.env
-# place a ClinicalTrials.gov-style CSV at backend/data/trials.csv
+# download the corpus URL from the Makefile's CORPUS_URL to backend/data/trials.csv
 ```
+</details>
 
 Set at minimum in `.env`:
 - `FMT_SECRET_KEY` — a long random string (`python -c "import secrets; print(secrets.token_urlsafe(64))"`)
@@ -144,6 +159,42 @@ this becomes hosted multi-user software handling PHI — execute BAAs with your 
 provider and add audit logging and a persistent user store. The local build is
 safe and responsible for development and demos with de-identified data; full
 hospital-grade HIPAA certification is a deliberate, larger step beyond this scope.
+
+---
+
+## Known limitations
+
+Stated plainly, because the failure mode of a decision-support tool is a user
+trusting it further than it has earned.
+
+**The trial corpus is a 10,000-row sample, not the registry.** ClinicalTrials.gov
+holds roughly 555,000 studies; this ships ~1.8% of them. A genuinely suitable trial
+that is not in the sample cannot be retrieved, and the board gives no indication
+that it is missing. Absence of a match here is *not* evidence that no trial exists.
+
+**Retrieval is lexical, not semantic.** Candidate generation is BM25 plus structured
+gates; there is no vector index. A trial phrased in vocabulary disjoint from the
+chart will not surface, however clinically relevant it is. The LLM re-ranks and
+explains within the gated candidate set — it cannot recover a trial retrieval missed.
+
+**De-identification is redaction assistance, not certified de-identification.** It is
+neither Safe Harbor nor Expert Determination certified. The rule layer is pattern-
+and label-driven, so it is strongest on structured identifiers (labelled fields,
+dates, ZIP, email, URL, phone, SSN/MRN) and weakest on free text. Human review of the
+scrubbed text is a required step, not a formality — see `docs/PRIVACY_DATA_FLOW.md`
+for the current per-class coverage and residual gaps.
+
+**Match scores are fit, not eligibility.** The score reflects how well a trial matches
+the extracted profile. It is not a probability of enrolment and carries no protocol
+review. Final eligibility always requires the protocol and a clinician.
+
+**Recruiting status is only as fresh as the corpus.** The board shows the corpus's
+data-current-through date; sites and statuses drift continuously between corpus
+updates. Confirm status with the site before acting.
+
+**No BAA.** Zero-Data-Retention routing is *requested* of OpenRouter, but no business
+associate agreement is in place and the response is not verified to have come from a
+ZDR provider. Do not run real PHI through the LLM path on this basis alone.
 
 ---
 

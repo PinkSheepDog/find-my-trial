@@ -39,6 +39,11 @@ class Settings(BaseSettings):
     # Optional: if the CSV is absent at startup (e.g. a fresh cloud deploy where the
     # 33MB corpus is not in git), download it once from this URL. Empty = never fetch.
     trials_csv_url: str = ""
+    # Expected SHA-256 of the corpus. The download URL is operator-configurable, so
+    # without this TLS is the only integrity control and a swapped release asset, a
+    # misconfigured URL, or a truncated-but-nonzero file is accepted and served.
+    # Empty = integrity unverified (a warning is emitted at startup).
+    trials_csv_sha256: str = ""
 
     # --- Auth / session ---
     session_idle_timeout_minutes: int = 30
@@ -47,7 +52,13 @@ class Settings(BaseSettings):
     admin_password: str = ""
 
     # --- Intake / de-identification ---
+    # When True, /api/match REFUSES text that has not been explicitly approved via
+    # /api/approve-deid, and rejects approval of text that still carries detectable
+    # identifiers. Enforced server-side, so a direct POST to /api/match cannot skip
+    # the gate. Set False only for local development against synthetic data.
     require_deid_review: bool = True
+    # How long a de-identification approval stays valid before it must be re-reviewed.
+    deid_approval_ttl_minutes: int = 30
     use_presidio: bool = False
     max_upload_mb: int = 15
 
