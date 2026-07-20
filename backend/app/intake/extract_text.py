@@ -45,6 +45,21 @@ _MAGIC = {
     ".tif": (b"II*\x00", b"MM\x00*"), ".tiff": (b"II*\x00", b"MM\x00*"),
     ".bmp": (b"BM",),
 }
+# Byte-order marks some exporters prepend; stripped before signature matching so a
+# BOM-prefixed file isn't misread as "wrong content".
+_BOMS = (b"\xef\xbb\xbf", b"\xff\xfe", b"\xfe\xff")
+# PDFs are the one format where the marker legitimately floats: Adobe and PyMuPDF
+# both accept "%PDF" anywhere in the first kilobyte (leading whitespace/junk from a
+# scanner or exporter is common). Match the parser's tolerance so validation never
+# rejects a file the extractor could actually read.
+_SIGNATURE_SCAN_BYTES = 1024
+
+
+def _strip_bom(data: bytes) -> bytes:
+    for bom in _BOMS:
+        if data.startswith(bom):
+            return data[len(bom):]
+    return data
 
 
 class UploadRejected(ValueError):
@@ -66,10 +81,28 @@ def validate_upload(filename: str, data: bytes) -> None:
         raise UploadRejected(f"Unsupported file type {ext or '(none)'}. Allowed: "
                              + ", ".join(sorted(set(ALLOWED_EXTENSIONS))), 415)
     sigs = _MAGIC.get(ext)
-    if sigs and not any(data.startswith(s) for s in sigs):
-        raise UploadRejected(f"File content does not match its {ext} extension.", 415)
+    if sigs:
+        head = _strip_bom(data)
+        # PDFs: scan the first KB (marker can float). Other binary formats really do
+        # start with their signature, so require it at the front.
+        if ext == ".pdf":
+            matched = any(sig in head[:_SIGNATURE_SCAN_BYTES] for sig in sigs)
+        else:
+            matched = any(head.startswith(sig) for sig in sigs)
+        if not matched:
+            kind = ext.lstrip(".").upper()
+            raise UploadRejected(
+                f"This file is named \"{ext}\" but its contents aren't a valid {kind} "
+                f"(it may be renamed, corrupted, or actually a different format). "
+                f"Re-save it as a real {kind}, or paste the report text into the box below.",
+                415,
+            )
     if ext == ".pdf" and b"/Encrypt" in data[:4096]:
-        raise UploadRejected("Encrypted PDFs are not supported; provide an unlocked copy.", 415)
+        raise UploadRejected(
+            "This PDF is password-protected, so its text can't be read. "
+            "Provide an unlocked copy, or paste the report text into the box below.",
+            415,
+        )
 
 
 def extract_text(filename: str, data: bytes) -> ExtractedDocument:
@@ -143,7 +176,8 @@ def _extract_pdf(data: bytes) -> ExtractedDocument:
                     warnings.append(warn)
     text = "\n\n".join(chunks)
     if not text and not warnings:
-        warnings.append("PDF contained no extractable text and OCR produced nothing.")
+        warnings.append("No readable text was found in this PDF. If it is a scan, "
+                        "paste the report text into the box below.")
     return ExtractedDocument(
         text=text, source_kind="pdf+ocr" if ocr_used else "pdf",
         warnings=warnings, ocr_used=ocr_used,
@@ -155,8 +189,9 @@ def _ocr_pdf_page(page) -> tuple[str, bool, str | None]:
         import pytesseract  # type: ignore
         from PIL import Image  # type: ignore
     except ImportError:
-        return "", False, ("A page appears to be scanned (no text layer). Install "
-                           "OCR support (pytesseract + Pillow + Tesseract) to read it.")
+        return "", False, ("This looks like a scanned page — an image with no selectable "
+                           "text. Paste the report text into the box below, or enable OCR "
+                           "on the server (see README) to read scans automatically.")
     try:
         import fitz  # noqa: F401
         pix = page.get_pixmap(dpi=200)
@@ -190,7 +225,8 @@ def _extract_image(data: bytes) -> ExtractedDocument:
     except ImportError:
         return ExtractedDocument(
             text="", source_kind="image",
-            warnings=["Image OCR requires pytesseract + Pillow + the Tesseract binary."],
+            warnings=["This image can't be read without OCR. Paste the report text into "
+                      "the box below, or enable OCR on the server (see README)."],
         )
     try:
         img = Image.open(io.BytesIO(data))

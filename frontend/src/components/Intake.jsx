@@ -22,9 +22,22 @@ export default function Intake({ onDeidentify, filters, setFilters, busy, server
     setFileNote(`Extracting text from ${file.name}…`);
     try {
       const r = await api.extractText(file);
-      setText((t) => (t ? t + "\n\n" : "") + (r.text || ""));
-      const warn = r.warnings?.length ? ` (${r.warnings.join("; ")})` : "";
-      setFileNote(`Loaded ${file.name} [${r.source_kind}]${warn}`);
+      const extracted = (r.text || "").trim();
+      const warn = r.warnings?.length ? r.warnings.join(" ") : "";
+      if (!extracted) {
+        // The file was accepted but no usable text came out (e.g. a scan with no OCR).
+        // That is a dead end for the user, not a success — say so plainly and don't
+        // pretend the chart is loaded.
+        setFileNote("");
+        setFileError({
+          message: warn || `No text could be read from ${file.name}. Paste the report text below.`,
+          errorId: "",
+        });
+        return;
+      }
+      setText((t) => (t ? t + "\n\n" : "") + extracted);
+      // Text came through; a warning here is a caveat (e.g. one scanned page), not a failure.
+      setFileNote(warn ? `Loaded ${file.name} — ${warn}` : `Loaded ${file.name}.`);
     } catch (err) {
       setFileNote("");
       setFileError(describeError(err, "Could not read that file."));
