@@ -9,7 +9,6 @@ import Handoff from "./components/Handoff.jsx";
 import Sidebar from "./components/Sidebar.jsx";
 import { DEFAULT_FILTERS, payloadForServer } from "./lib/filters.js";
 import { describeError } from "./lib/errors.js";
-import { corpusFreshness, corpusProvenance, ageLabel } from "./lib/freshness.js";
 
 // The workspace is a guarded, multi-step flow:
 //   login -> intake (paste/upload) -> de-id REVIEW (human gate) -> results.
@@ -168,8 +167,6 @@ export default function App() {
     setDeid(null); setResult(null); setShortlist([]); setApproval(null); setError(null);
   }
 
-  const fresh = corpusFreshness(health);
-  const prov = corpusProvenance(health);
   const resultCount = result?.match?.results?.length;
 
   return (
@@ -182,29 +179,6 @@ export default function App() {
         <header className="topbar">
           <h1>Clinical Trial Review Workspace</h1>
           <p>Chart intake → de-identification review → ranked trials → handoff.</p>
-
-          {/* Corpus freshness drives referral decisions, so it sits above the
-              fold rather than being fetched and discarded. */}
-          <div className={`corpus-banner ${fresh.stale ? "stale" : ""}`} data-testid="corpus-banner">
-            <span className="corpus-banner-label">Trial data current through</span>
-            <strong className="corpus-banner-date">{health ? fresh.label : "…"}</strong>
-            {health && fresh.ageDays != null && (
-              <span className="corpus-banner-age">({ageLabel(fresh.ageDays)})</span>
-            )}
-            {health && (
-              <span className="corpus-banner-meta">
-                {Number(health.trial_count || 0).toLocaleString()} trials indexed
-                {fresh.normalizationVersion ? ` · index ${fresh.normalizationVersion}` : ""}
-              </span>
-            )}
-            {fresh.note && <span className="corpus-banner-note">{fresh.note}</span>}
-            {/* Never imply an integrity check that did not happen. */}
-            {health && prov.integrityKnown && !prov.integrityVerified && (
-              <span className="corpus-banner-note">
-                Corpus provenance unverified — accepted without a digest check.
-              </span>
-            )}
-          </div>
         </header>
 
         {error && (

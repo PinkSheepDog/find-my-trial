@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useMediaQuery } from "../lib/useMediaQuery.js";
 import { useFocusTrap } from "../lib/useFocusTrap.js";
-import { ageLabel, corpusFreshness, corpusProvenance } from "../lib/freshness.js";
 
 const NAV_ITEMS = [
   { href: "#intake", label: "1 · Intake" },
@@ -40,8 +39,6 @@ export default function Sidebar({ user, health, onLogout }) {
   }, [isDrawer, open]);
 
   useFocusTrap(panelRef, isDrawer && open, { onEscape: close, returnFocusTo: toggleRef });
-
-  const fresh = corpusFreshness(health);
 
   return (
     <>
@@ -94,8 +91,6 @@ export default function Sidebar({ user, health, onLogout }) {
           ))}
         </nav>
 
-        <CorpusStat health={health} fresh={fresh} />
-
         {health?.degraded_mode && (
           <div className="sidebar-note warn">
             Degraded mode: no LLM key set — deterministic extraction &amp; explanations.
@@ -110,28 +105,5 @@ export default function Sidebar({ user, health, onLogout }) {
         </div>
       </aside>
     </>
-  );
-}
-
-// Corpus provenance, shown wherever the user is looking: how many trials, how
-// current they are, and which normalization revision produced the index.
-function CorpusStat({ health, fresh }) {
-  const prov = corpusProvenance(health);
-  return (
-    <div className={`sidebar-stat ${fresh.stale ? "stale" : ""}`}>
-      <span>Indexed trials</span>
-      <strong>{health ? Number(health.trial_count || 0).toLocaleString() : "…"}</strong>
-      <span className="corpus-line">Data current through</span>
-      <strong className="corpus-date">{health ? fresh.label : "…"}</strong>
-      {health && fresh.ageDays != null && (
-        <span className="corpus-age">{ageLabel(fresh.ageDays)}</span>
-      )}
-      {health && fresh.normalizationVersion && (
-        <span className="corpus-line">index {fresh.normalizationVersion}</span>
-      )}
-      {health && prov.integrityKnown && !prov.integrityVerified && (
-        <span className="corpus-line corpus-unverified">provenance unverified</span>
-      )}
-    </div>
   );
 }

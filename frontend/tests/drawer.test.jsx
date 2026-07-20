@@ -112,19 +112,12 @@ describe("navigation rail (desktop)", () => {
   });
 });
 
-describe("corpus freshness in the rail", () => {
-  it("shows the data-current-through date, not just the trial count", () => {
-    renderSidebar(1280);
-    expect(screen.getByText(/data current through/i)).toBeInTheDocument();
-    expect(screen.getByText("2026-07-01")).toBeInTheDocument();
-    expect(screen.getByText("1,234")).toBeInTheDocument();
-  });
-
+describe("sidebar rail", () => {
   it("does not crash before /health resolves", () => {
     setViewport(1280);
     const spy = vi.spyOn(console, "error").mockImplementation(() => {});
     render(<Sidebar user="dr.smith" health={null} onLogout={() => {}} />);
-    expect(screen.getAllByText("…").length).toBeGreaterThan(0);
+    expect(screen.getByRole("navigation", { name: /workflow steps/i })).toBeInTheDocument();
     spy.mockRestore();
   });
 });

@@ -72,7 +72,6 @@ export default function PatientProfile({ profile }) {
     <section id="profile" className="panel">
       <div className="panel-head">
         <h2>3 · Extracted Patient Profile</h2>
-        <p>Structured signals from the de-identified chart. Extractor: <code>{p.extractor}</code>.</p>
       </div>
 
       <div className="profile-summary">{p.summary_line || summarize(p)}</div>
